@@ -1,0 +1,11 @@
+concept:personbornincity
+concept:personmovedtostateorprovince
+concept:personbornincity -> concept:citylocatedinstate
+concept:persongraduatedfromuniversity -> concept:persongraduatedfromuniversity_inv -> concept:personbornincity
+concept:persongraduatedfromuniversity -> concept:persongraduatedschool_inv -> concept:personbornincity
+concept:personbelongstoorganization -> concept:personbelongstoorganization_inv -> concept:personbornincity
+concept:personbornincity -> concept:agentactsinlocation -> concept:atlocation
+concept:personbornincity -> concept:locationlocatedwithinlocation -> concept:locationlocatedwithinlocation_inv
+concept:personbelongstoorganization -> concept:personbelongstoorganization_inv -> concept:persongraduatedfromuniversity -> concept:persongraduatedschool_inv -> concept:personbornincity
+concept:personbelongstoorganization -> concept:personbelongstoorganization_inv -> concept:personbornincity -> concept:agentactsinlocation -> concept:atlocation
+concept:personbelongstoorganization -> concept:personbelongstoorganization_inv -> concept:personbornincity -> concept:mutualproxyfor_inv -> concept:subpartof -> concept:locationlocatedwithinlocation_inv -> concept:atlocation

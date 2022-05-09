@@ -1,0 +1,24 @@
+concept:athleteplaysforteam -> concept:teamplaysinleague	23
+concept:athleteplayssport -> concept:teamplayssport_inv -> concept:teamplaysinleague	21
+concept:athleteledsportsteam -> concept:teamplaysinleague	6
+concept:athleteplaysforteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysinleague	4
+concept:athleteflyouttosportsteamposition -> concept:athleteflyouttosportsteamposition_inv -> concept:athleteplayssport -> concept:teamplayssport_inv -> concept:teamplaysinleague	4
+concept:athleteplayssport -> concept:teamplayssport_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysinleague	3
+concept:athletehomestadium -> concept:leaguestadiums_inv	3
+concept:athleteplaysforteam -> concept:teamplaysagainstteam -> concept:teamplaysinleague	2
+concept:athleteflyouttosportsteamposition -> concept:athleteflyouttosportsteamposition_inv -> concept:athletehomestadium -> concept:leaguestadiums_inv	1
+concept:athleteplayssport -> concept:teamplayssport_inv -> concept:subpartoforganization	1
+concept:athleteplayssport -> concept:teamplayssport_inv -> concept:teamplaysincity -> concept:subpartoforganization	1
+concept:athleteplayssport -> concept:teamplayssport_inv -> concept:teamwontrophy -> concept:atdate -> concept:mutualproxyfor -> concept:atlocation_inv -> concept:proxyfor_inv -> concept:organizationhiredperson -> concept:agentcollaborateswithagent_inv -> concept:agentbelongstoorganization	1
+concept:athleteplayssport -> concept:teamplayssport_inv -> concept:teamplaysagainstteam -> concept:teamplaysincity -> concept:stadiumlocatedincity_inv -> concept:leaguestadiums_inv -> concept:agentcontrols -> concept:teamplaysinleague	1
+concept:athleteflyouttosportsteamposition -> concept:athleteflyouttosportsteamposition_inv -> concept:athleteplayssport -> concept:teamplayssport_inv -> concept:teamplaysagainstteam_inv -> concept:agentcontrols_inv	1
+concept:athleteflyouttosportsteamposition -> concept:sporthassportsteamposition_inv -> concept:athleteplayssport_inv -> concept:athleteplaysforteam -> concept:agentcontrols_inv	1
+concept:athleteplayssport -> concept:sportfansincountry -> concept:hasofficeincountry_inv -> concept:hasofficeincountry -> concept:atlocation_inv -> concept:atlocation -> concept:stadiumlocatedincity_inv -> concept:leaguestadiums_inv	1
+concept:athleteplayssport -> concept:teamplayssport_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysinleague	1
+concept:athleteflyouttosportsteamposition -> concept:athleteflyouttosportsteamposition_inv -> concept:athleteplayssport -> concept:teamplayssport_inv -> concept:teamplaysagainstteam -> concept:teamplaysinleague	1
+concept:athleteledsportsteam -> concept:teamplaysagainstteam_inv -> concept:sportsgameteam_inv -> concept:agentparticipatedinevent_inv -> concept:agentcompeteswithagent -> concept:teamplaysagainstteam_inv -> concept:teamplaysinleague	1
+concept:athleteledsportsteam -> concept:teamplaysincity -> concept:stadiumlocatedincity_inv -> concept:leaguestadiums_inv	1
+concept:personbelongstoorganization -> concept:teamplaysagainstteam_inv -> concept:teamplaysinleague	1
+concept:athleteledsportsteam -> concept:teamplaysagainstteam -> concept:teamplaysinleague	1
+concept:athleteplaysforteam -> concept:teamplaysincity -> concept:stadiumlocatedincity_inv -> concept:leaguestadiums_inv	1
+concept:athleteplayssport -> concept:sportfansincountry -> concept:atdate -> concept:atdate_inv -> concept:atdate -> concept:atdate_inv -> concept:proxyfor -> concept:proxyfor_inv -> concept:mutualproxyfor -> concept:agentcollaborateswithagent -> concept:agentcollaborateswithagent_inv -> concept:agentbelongstoorganization	1

@@ -1,0 +1,12 @@
+concept:agentcollaborateswithagent	90
+concept:subpartof	34
+concept:agentcontrols_inv	4
+concept:agentcompeteswithagent_inv	4
+concept:televisionstationaffiliatedwith -> concept:televisionstationaffiliatedwith_inv -> concept:agentcollaborateswithagent	2
+concept:subpartof -> concept:agentactsinlocation -> concept:agentactsinlocation_inv	1
+concept:atlocation	1
+concept:agentcontrols -> concept:agentcontrols_inv -> concept:agentcollaborateswithagent	1
+concept:agentcontrols_inv -> concept:proxyfor -> concept:subpartoforganization	1
+concept:mutualproxyfor_inv	1
+concept:agentcollaborateswithagent -> concept:agentcollaborateswithagent_inv -> concept:agentcompeteswithagent_inv	1
+concept:agentcontrols -> concept:agentcontrols_inv -> concept:agentcompeteswithagent_inv	1

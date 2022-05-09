@@ -1,0 +1,12 @@
+concept:worksfor_inv	29
+concept:personbelongstoorganization_inv	13
+concept:organizationterminatedperson	6
+concept:personleadsorganization_inv	2
+concept:coachesteam_inv	2
+concept:mutualproxyfor	2
+concept:worksfor_inv -> concept:worksfor -> concept:coachesteam_inv	1
+concept:topmemberoforganization_inv	1
+concept:ceoof_inv	1
+concept:agentbelongstoorganization -> concept:worksfor_inv	1
+concept:subpartof	1
+concept:atdate -> concept:atdate_inv -> concept:worksfor_inv	1

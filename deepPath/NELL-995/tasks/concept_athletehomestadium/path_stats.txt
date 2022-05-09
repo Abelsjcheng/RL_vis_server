@@ -1,0 +1,5 @@
+concept:athleteplaysforteam -> concept:teamhomestadium	61
+concept:athleteledsportsteam -> concept:teamhomestadium	5
+concept:organizationhiredperson_inv -> concept:teamhomestadium	2
+concept:athleteplaysforteam -> concept:teamplaysincity -> concept:stadiumlocatedincity_inv	1
+concept:athleteplaysforteam -> concept:teamplaysagainstteam -> concept:sportsgameteam_inv -> concept:sportsgameteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:agentcompeteswithagent -> concept:agentcompeteswithagent -> concept:teamhomestadium	1

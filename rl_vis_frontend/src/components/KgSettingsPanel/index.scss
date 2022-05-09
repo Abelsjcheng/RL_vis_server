@@ -1,0 +1,22 @@
+.Kg-setting{
+    position: absolute;
+    .Kg-setting-btn {
+        position: absolute;
+        overflow: auto;
+        top: 20px;
+        left: 40px;
+    }
+    
+    .Kg-setting-card {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        min-height: 360px;
+        width: 400px;
+        box-shadow: 0 3px 6px -4px #0000001f, 0 6px 16px #00000014, 0 9px 28px 8px #0000000d;
+
+        .kg-setting-title {
+            font-size: 16px;
+        }
+    }
+}

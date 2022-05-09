@@ -1,0 +1,25 @@
+concept:athleteledsportsteam
+concept:personbelongstoorganization
+concept:agentcollaborateswithagent_inv
+concept:athletehomestadium -> concept:teamhomestadium_inv
+concept:coachwontrophy -> concept:teamwontrophy_inv
+concept:athleteledsportsteam -> concept:teamplaysagainstteam
+concept:athleteledsportsteam -> concept:teamplaysagainstteam_inv
+concept:athleteplaysinleague -> concept:teamplaysinleague_inv
+concept:athleteplayssport -> concept:teamplayssport_inv
+concept:athleteledsportsteam -> concept:teamalsoknownas_inv
+concept:athletehomestadium -> concept:stadiumlocatedincity -> concept:teamplaysincity_inv
+concept:athletehomestadium -> concept:teamhomestadium_inv -> concept:teamplaysagainstteam
+concept:athleteflyouttosportsteamposition -> concept:athleteflyouttosportsteamposition_inv -> concept:athleteledsportsteam
+concept:athletehomestadium -> concept:athletehomestadium_inv -> concept:athleteledsportsteam
+concept:athleteplaysinleague -> concept:teamplaysinleague_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam
+concept:athleteflyouttosportsteamposition -> concept:athleteflyouttosportsteamposition_inv -> concept:athleteplaysinleague -> concept:teamplaysinleague_inv
+concept:athleteplaysinleague -> concept:leaguestadiums -> concept:teamhomestadium_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv
+concept:athleteplaysinleague -> concept:subpartoforganization -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv
+concept:athleteplayssport -> concept:teamplayssport_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv
+concept:athleteflyouttosportsteamposition -> concept:sporthassportsteamposition_inv -> concept:teamplayssport_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:sportsgameteam_inv -> concept:sportsgameteam -> concept:teamplaysagainstteam
+concept:athleteplaysinleague -> concept:agentbelongstoorganization_inv -> concept:agentparticipatedinevent -> concept:sportsgameteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam
+concept:athleteplaysinleague -> concept:agentcontrols -> concept:agentparticipatedinevent -> concept:sportsgameteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam
+concept:athleteplaysinleague -> concept:agentbelongstoorganization_inv -> concept:agentparticipatedinevent -> concept:sportsgameteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:agentparticipatedinevent -> concept:agentparticipatedinevent_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam
+concept:athleteplaysinleague -> concept:agentbelongstoorganization_inv -> concept:agentparticipatedinevent -> concept:sportsgameteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv
+concept:athleteplaysinleague -> concept:teamplaysinleague_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:sportsgameteam_inv -> concept:sportsgameteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv

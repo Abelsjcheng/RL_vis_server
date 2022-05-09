@@ -1,0 +1,19 @@
+concept:athletehomestadium -> concept:teamhomestadium_inv	32
+concept:athleteledsportsteam	15
+concept:athleteledsportsteam -> concept:teamplaysagainstteam	2
+concept:coachwontrophy -> concept:teamwontrophy_inv	1
+concept:athletehomestadium -> concept:locationlocatedwithinlocation_inv -> concept:proxyfor_inv -> concept:atdate -> concept:atdate_inv -> concept:atdate -> concept:atdate_inv -> concept:atdate -> concept:atdate_inv -> concept:atdate -> concept:atdate_inv -> concept:atdate -> concept:atdate_inv -> concept:atdate -> concept:atdate_inv -> concept:locationlocatedwithinlocation_inv -> concept:atlocation_inv -> concept:proxyfor -> concept:proxyfor_inv -> concept:atlocation -> concept:organizationheadquarteredinstateorprovince_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv	1
+concept:athleteplaysinleague -> concept:subpartoforganization_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam	1
+concept:athleteplaysinleague -> concept:subpartoforganization_inv -> concept:teamplaysagainstteam_inv	1
+concept:athleteplaysinleague -> concept:leaguestadiums -> concept:sportusesstadium_inv -> concept:teamplayssport_inv -> concept:teamplaysagainstteam	1
+concept:athleteplaysinleague -> concept:subpartoforganization_inv -> concept:teamplaysagainstteam	1
+concept:athleteplayssport -> concept:teamplayssport_inv	1
+concept:athleteplaysinleague -> concept:subpartoforganization_inv -> concept:agentparticipatedinevent -> concept:sportsgameteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv	1
+concept:athletehomestadium -> concept:teamhomestadium_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam	1
+concept:athleteplaysinleague -> concept:teamplaysinleague_inv	1
+concept:agentcollaborateswithagent_inv	1
+concept:athletehomestadium -> concept:teamhomestadium_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv	1
+concept:athleteflyouttosportsteamposition -> concept:athleteflyouttosportsteamposition_inv -> concept:athleteplaysinleague -> concept:teamplaysinleague_inv -> concept:sportsgameteam_inv -> concept:sportsgameteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam	1
+concept:athleteledsportsteam -> concept:teamplaysagainstteam_inv	1
+concept:athletehomestadium -> concept:teamhomestadium_inv -> concept:teamplaysagainstteam_inv	1
+concept:athleteflyouttosportsteamposition -> concept:athleteflyouttosportsteamposition_inv -> concept:athleteplaysinleague -> concept:leaguestadiums -> concept:stadiumlocatedincity -> concept:teamplaysincity_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv	1

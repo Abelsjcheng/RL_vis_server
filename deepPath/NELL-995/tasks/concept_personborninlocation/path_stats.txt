@@ -1,0 +1,9 @@
+concept:personbornincity	150
+concept:persongraduatedfromuniversity -> concept:persongraduatedfromuniversity_inv -> concept:personbornincity	5
+concept:personbornincity -> concept:atlocation_inv -> concept:atlocation	4
+concept:personbelongstoorganization -> concept:personbelongstoorganization_inv -> concept:personbornincity	3
+concept:persongraduatedfromuniversity -> concept:persongraduatedschool_inv -> concept:personbornincity	2
+concept:personbornincity -> concept:personbornincity_inv -> concept:personbelongstoorganization -> concept:personbelongstoorganization_inv -> concept:personbornincity	1
+concept:persongraduatedfromuniversity -> concept:persongraduatedfromuniversity_inv -> concept:persongraduatedfromuniversity -> concept:persongraduatedfromuniversity_inv -> concept:personbornincity	1
+concept:personbornincity -> concept:locationlocatedwithinlocation -> concept:locationlocatedwithinlocation_inv	1
+concept:personmovedtostateorprovince	1

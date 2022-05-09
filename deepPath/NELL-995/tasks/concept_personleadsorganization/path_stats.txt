@@ -1,0 +1,15 @@
+concept:worksfor	105
+concept:organizationterminatedperson_inv	14
+concept:mutualproxyfor_inv	6
+concept:personbelongstoorganization	6
+concept:organizationhiredperson_inv	4
+concept:worksfor -> concept:worksfor_inv -> concept:worksfor	2
+concept:agentcollaborateswithagent_inv	2
+concept:worksfor -> concept:headquarteredin -> concept:headquarteredin_inv	1
+concept:personleadsgeopoliticalorganization	1
+concept:topmemberoforganization -> concept:subpartoforganization -> concept:subpartoforganization_inv	1
+concept:worksfor -> concept:organizationhiredperson -> concept:worksfor	1
+concept:organizationterminatedperson_inv -> concept:topmemberoforganization_inv -> concept:organizationhiredperson_inv	1
+concept:proxyfor	1
+concept:worksfor -> concept:subpartoforganization -> concept:subpartoforganization_inv	1
+concept:topmemberoforganization -> concept:organizationhiredperson -> concept:worksfor	1

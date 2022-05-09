@@ -1,0 +1,11 @@
+concept:athleteplaysforteam -> concept:teamhomestadium
+concept:athleteledsportsteam -> concept:teamhomestadium
+concept:organizationhiredperson_inv -> concept:stadiumlocatedincity_inv
+concept:athleteplaysinleague -> concept:agentactsinlocation
+concept:athleteplaysforteam -> concept:teamplaysincity -> concept:stadiumlocatedincity_inv
+concept:athleteledsportsteam -> concept:teamplaysincity -> concept:proxyfor
+concept:athleteplaysforteam -> concept:teamplaysincity -> concept:proxyfor
+concept:athleteplaysforteam -> concept:teamplayssport -> concept:sportusesstadium
+concept:athleteplaysforteam -> concept:teamplaysinleague -> concept:leaguestadiums
+concept:athleteledsportsteam -> concept:teamplaysagainstteam_inv -> concept:teamhomestadium
+concept:athleteplaysforteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamhomestadium

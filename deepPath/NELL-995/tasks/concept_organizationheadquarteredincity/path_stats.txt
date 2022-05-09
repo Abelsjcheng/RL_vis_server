@@ -1,0 +1,6 @@
+concept:televisionstationincity	54
+concept:radiostationincity	53
+concept:headquarteredin	48
+concept:hasofficeincity	35
+concept:competeswith_inv -> concept:headquarteredin	2
+concept:competeswith_inv -> concept:competeswith_inv -> concept:competeswith_inv -> concept:headquarteredin	1

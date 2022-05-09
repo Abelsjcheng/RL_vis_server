@@ -1,0 +1,27 @@
+concept:teamhomestadium -> concept:sportusesstadium_inv
+concept:athleteledsportsteam_inv -> concept:athleteplayssport
+concept:athleteplaysforteam_inv -> concept:athleteplayssport
+concept:teamplaysagainstteam -> concept:teamhomestadium -> concept:sportusesstadium_inv
+concept:teamplaysinleague -> concept:athleteplaysinleague_inv -> concept:athleteplayssport
+concept:teamplaysinleague -> concept:leaguestadiums -> concept:sportusesstadium_inv
+concept:teamplaysagainstteam_inv -> concept:athleteledsportsteam_inv -> concept:athleteplayssport
+concept:athleteplaysforteam_inv -> concept:athletehomestadium -> concept:sportusesstadium_inv
+concept:teamplaysagainstteam -> concept:athleteplaysforteam_inv -> concept:athleteplayssport
+concept:teamplaysinleague -> concept:teamplaysinleague_inv -> concept:teamhomestadium -> concept:sportusesstadium_inv
+concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamhomestadium -> concept:sportusesstadium_inv
+concept:teamplaysagainstteam_inv -> concept:teamplaysincity -> concept:stadiumlocatedincity_inv -> concept:sportusesstadium_inv
+concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamhomestadium -> concept:sportusesstadium_inv
+concept:teamplaysinleague -> concept:teamplaysinleague_inv -> concept:athleteledsportsteam_inv -> concept:athleteplayssport
+concept:teamplaysagainstteam -> concept:teamplaysinleague -> concept:athleteplaysinleague_inv -> concept:athleteplayssport
+concept:athleteplaysforteam_inv -> concept:athleteledsportsteam -> concept:teamhomestadium -> concept:sportusesstadium_inv
+concept:proxyfor -> concept:atlocation -> concept:locationlocatedwithinlocation_inv -> concept:mutualproxyfor -> concept:sportfansincountry_inv
+concept:teamplaysincity -> concept:stadiumlocatedincity_inv -> concept:sportusesstadium_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv
+concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysinleague -> concept:teamplaysinleague_inv -> concept:teamhomestadium -> concept:sportusesstadium_inv
+concept:teamplaysagainstteam_inv -> concept:teamplaysinleague -> concept:teamplaysinleague_inv -> concept:teamplaysagainstteam_inv -> concept:teamhomestadium -> concept:sportusesstadium_inv
+concept:teamplaysinleague -> concept:teamplaysinleague_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamhomestadium -> concept:sportusesstadium_inv
+concept:teamhomestadium -> concept:sportusesstadium_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv
+concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysincity -> concept:stadiumlocatedincity_inv -> concept:sportusesstadium_inv
+concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysincity -> concept:hasofficeincity_inv -> concept:competeswith -> concept:automobilemakerdealersincountry -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv
+concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplaysinleague -> concept:teamplaysinleague_inv -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamhomestadium -> concept:sportusesstadium_inv
+concept:teamplaysagainstteam_inv -> concept:sportsgameteam_inv -> concept:sportsgameteam -> concept:teamplaysagainstteam -> concept:athleteplaysforteam_inv -> concept:athleteplayssport -> concept:sportfansincountry -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv
+concept:teamalsoknownas_inv -> concept:organizationalsoknownas_inv -> concept:teamplaysincity -> concept:atlocation -> concept:locationlocatedwithinlocation_inv -> concept:atlocation -> concept:locationlocatedwithinlocation_inv -> concept:atlocation -> concept:statelocatedingeopoliticallocation -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv

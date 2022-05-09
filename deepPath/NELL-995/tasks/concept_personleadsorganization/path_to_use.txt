@@ -1,0 +1,18 @@
+concept:worksfor
+concept:organizationterminatedperson_inv
+concept:mutualproxyfor_inv
+concept:personbelongstoorganization
+concept:organizationhiredperson_inv
+concept:agentcollaborateswithagent_inv
+concept:personleadsgeopoliticalorganization
+concept:ceoof
+concept:topmemberoforganization -> concept:worksfor_inv -> concept:worksfor
+concept:worksfor -> concept:worksfor_inv -> concept:worksfor
+concept:organizationterminatedperson_inv -> concept:organizationterminatedperson -> concept:organizationhiredperson_inv
+concept:organizationterminatedperson_inv -> concept:organizationterminatedperson -> concept:worksfor
+concept:organizationterminatedperson_inv -> concept:mutualproxyfor -> concept:worksfor
+concept:organizationterminatedperson_inv -> concept:organizationhiredperson -> concept:worksfor
+concept:organizationterminatedperson_inv -> concept:topmemberoforganization_inv -> concept:organizationterminatedperson_inv
+concept:organizationterminatedperson_inv -> concept:agentcollaborateswithagent -> concept:organizationterminatedperson_inv
+concept:organizationterminatedperson_inv -> concept:companyeconomicsector -> concept:companyeconomicsector_inv
+concept:organizationterminatedperson_inv -> concept:organizationhiredperson -> concept:organizationterminatedperson_inv

@@ -1,0 +1,16 @@
+concept:agentcollaborateswithagent
+concept:subpartof
+concept:agentcontrols_inv
+concept:agentcollaborateswithagent_inv
+concept:agentcompeteswithagent_inv
+concept:mutualproxyfor_inv
+concept:agentcontrols
+concept:agentcollaborateswithagent -> concept:personbelongstoorganization
+concept:televisionstationaffiliatedwith -> concept:televisionstationaffiliatedwith_inv -> concept:subpartof
+concept:agentcontrols -> concept:organizationheadquarteredincity -> concept:headquarteredin_inv
+concept:subpartof -> concept:agentactsinlocation -> concept:agentactsinlocation_inv
+concept:televisionstationaffiliatedwith -> concept:televisionstationaffiliatedwith_inv -> concept:agentcollaborateswithagent
+concept:agentcollaborateswithagent -> concept:agentcollaborateswithagent_inv -> concept:agentcompeteswithagent_inv
+concept:proxyfor -> concept:agentcontrols -> concept:agentcontrols
+concept:subpartof -> concept:subpartof_inv -> concept:agentcontrols_inv
+concept:agentcollaborateswithagent -> concept:agentcollaborateswithagent -> concept:agentcontrols

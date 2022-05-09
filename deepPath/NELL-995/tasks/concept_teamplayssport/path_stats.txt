@@ -1,0 +1,18 @@
+concept:teamhomestadium -> concept:sportusesstadium_inv	4
+concept:teamplaysincity -> concept:stadiumlocatedincity_inv -> concept:sportusesstadium_inv	2
+concept:teamplaysinleague -> concept:athleteplaysinleague_inv -> concept:athleteplayssport	2
+concept:athleteplaysforteam_inv -> concept:athleteledsportsteam -> concept:teamplaysagainstteam_inv -> concept:athleteplaysforteam_inv -> concept:athleteplayssport	2
+concept:teamplaysinleague -> concept:teamplaysinleague_inv -> concept:athleteledsportsteam_inv -> concept:athleteplayssport	1
+concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamhomestadium -> concept:sportusesstadium_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv	1
+concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:athleteplaysforteam_inv -> concept:athleteplayssport	1
+concept:teamplaysinleague -> concept:teamplaysinleague_inv -> concept:teamplaysagainstteam -> concept:organizationheadquarteredinstateorprovince -> concept:agriculturalproductgrowinginstateorprovince_inv -> concept:agriculturalproductcamefromcountry -> concept:sportfansincountry_inv	1
+concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:athleteplaysforteam_inv -> concept:athleteplayssport	1
+concept:athleteplaysforteam_inv -> concept:athleteplayssport	1
+concept:teamplaysagainstteam -> concept:sportsgameteam_inv -> concept:sportsgameteam -> concept:athleteplaysforteam_inv -> concept:athleteplayssport	1
+concept:athleteplaysforteam_inv -> concept:athletehomestadium -> concept:sportusesstadium_inv	1
+concept:athleteplaysforteam_inv -> concept:athleteledsportsteam -> concept:teamplaysagainstteam -> concept:teamhomestadium -> concept:sportusesstadium_inv	1
+concept:sportsgameteam_inv -> concept:sportsgameteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamhomestadium -> concept:sportusesstadium_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv	1
+concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:agentparticipatedinevent -> concept:agentparticipatedinevent_inv -> concept:athleteplaysforteam_inv -> concept:athleteplayssport -> concept:sportfansincountry -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv	1
+concept:teamhomestadium -> concept:sportusesstadium_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv	1
+concept:teamplaysagainstteam -> concept:athleteplaysforteam_inv -> concept:athleteplayssport	1
+concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamhomestadium -> concept:sportusesstadium_inv	1

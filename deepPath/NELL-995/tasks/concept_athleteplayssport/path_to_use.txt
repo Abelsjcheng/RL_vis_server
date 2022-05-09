@@ -1,0 +1,24 @@
+concept:athleteplaysforteam -> concept:teamplayssport
+concept:athletehomestadium -> concept:sportusesstadium_inv
+concept:athleteledsportsteam -> concept:teamplayssport
+concept:athleteplaysinleague -> concept:teamplaysinleague_inv -> concept:teamplayssport
+concept:athleteplaysinleague -> concept:leaguestadiums -> concept:sportusesstadium_inv
+concept:athleteplaysinleague -> concept:subpartoforganization_inv -> concept:teamplayssport
+concept:athleteflyouttosportsteamposition -> concept:athleteflyouttosportsteamposition_inv -> concept:athleteplaysforteam -> concept:teamplayssport
+concept:athleteplaysforteam -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplayssport
+concept:athleteflyouttosportsteamposition -> concept:sporthassportsteamposition_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv
+concept:athleteplaysforteam -> concept:sportsgameteam_inv -> concept:sportsgamewinner -> concept:teamplayssport
+concept:athleteplaysinleague -> concept:agentbelongstoorganization_inv -> concept:agentcompeteswithagent -> concept:teamplayssport
+concept:athleteplaysinleague -> concept:teamplaysinleague_inv -> concept:teamplaysagainstteam_inv -> concept:teamplayssport
+concept:athleteplaysinleague -> concept:agentbelongstoorganization_inv -> concept:agentcompeteswithagent_inv -> concept:teamplayssport
+concept:athleteplaysforteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam_inv -> concept:teamplayssport
+concept:athleteflyouttosportsteamposition -> concept:athleteflyouttosportsteamposition_inv -> concept:athleteplaysinleague -> concept:teamplaysinleague_inv -> concept:teamplayssport
+concept:athleteflyouttosportsteamposition -> concept:athleteflyouttosportsteamposition_inv -> concept:athleteplaysforteam -> concept:teamplaysagainstteam_inv -> concept:teamplayssport
+concept:athleteplaysinleague -> concept:agentbelongstoorganization_inv -> concept:agentparticipatedinevent -> concept:sportsgameteam -> concept:teamplayssport
+concept:athleteplaysinleague -> concept:agentbelongstoorganization_inv -> concept:agentcompeteswithagent -> concept:teamplaysincity -> concept:stadiumlocatedincity_inv -> concept:sportusesstadium_inv
+concept:athleteplaysinleague -> concept:agentbelongstoorganization_inv -> concept:agentcompeteswithagent -> concept:proxyfor_inv -> concept:proxyfor -> concept:teamplayssport
+concept:athleteplaysinleague -> concept:teamplaysinleague_inv -> concept:teamhomestadium -> concept:proxyfor_inv -> concept:stadiumlocatedincity_inv -> concept:sportusesstadium_inv
+concept:athleteplaysforteam -> concept:teamplayssport -> concept:sportfansincountry -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv
+concept:athleteplaysinleague -> concept:agentbelongstoorganization_inv -> concept:agentcompeteswithagent -> concept:teamplaysagainstteam -> concept:teamplaysagainstteam_inv -> concept:teamplayssport -> concept:sportfansincountry -> concept:sportfansincountry_inv
+concept:athleteplaysinleague -> concept:subpartoforganization_inv -> concept:agentcompeteswithagent_inv -> concept:sportsgameteam_inv -> concept:sportsgameteam -> concept:teamplayssport -> concept:sportfansincountry -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv
+concept:athleteplaysforteam -> concept:organizationheadquarteredinstateorprovince -> concept:proxyfor_inv -> concept:atdate_inv -> concept:atdate -> concept:atdate_inv -> concept:countrylocatedingeopoliticallocation_inv -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv -> concept:sportfansincountry -> concept:sportfansincountry_inv

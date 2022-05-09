@@ -1,0 +1,14 @@
+concept:subpartoforganization -> concept:agentactsinlocation -> concept:leaguestadiums_inv	109
+concept:teamhomestadium -> concept:leaguestadiums_inv	2
+concept:agentcollaborateswithagent -> concept:agentcontrols -> concept:subpartoforganization -> concept:agentactsinlocation -> concept:leaguestadiums_inv	2
+concept:subpartoforganization -> concept:agentcompeteswithagent -> concept:subpartoforganization -> concept:agentactsinlocation -> concept:leaguestadiums_inv	1
+concept:teamplaysincity -> concept:proxyfor -> concept:leaguestadiums_inv	1
+concept:agentcollaborateswithagent -> concept:agentcompeteswithagent -> concept:subpartoforganization -> concept:agentactsinlocation -> concept:leaguestadiums_inv	1
+concept:teamplaysagainstteam_inv -> concept:athleteplaysforteam_inv -> concept:athleteplaysinleague	1
+concept:teamplaysagainstteam -> concept:athleteledsportsteam_inv -> concept:athleteplaysinleague	1
+concept:subpartoforganization -> concept:subpartoforganization_inv -> concept:teamplayssport -> concept:teamplayssport_inv -> concept:teamplaysagainstteam_inv -> concept:teamplaysagainstteam -> concept:teamhomestadium -> concept:leaguestadiums_inv	1
+concept:teamplaysagainstteam -> concept:teamplaysagainstteam -> concept:teamplayssport -> concept:athleteplayssport_inv -> concept:athleteplaysinleague	1
+concept:teamplayssport -> concept:teamplayssport_inv -> concept:athleteplaysforteam_inv -> concept:athleteplaysinleague	1
+concept:subpartoforganization -> concept:agentcompeteswithagent -> concept:teamhomestadium -> concept:leaguestadiums_inv	1
+concept:teamplayssport -> concept:teamplayssport_inv -> concept:teamplaysincity -> concept:stadiumlocatedincity_inv -> concept:leaguestadiums_inv -> concept:leaguestadiums -> concept:leaguestadiums_inv	1
+concept:subpartoforganization -> concept:subpartoforganization_inv -> concept:subpartoforganization -> concept:agentactsinlocation -> concept:leaguestadiums_inv	1
