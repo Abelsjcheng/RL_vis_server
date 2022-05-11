@@ -15,6 +15,7 @@ featurePath = dataPath_ + '/path_to_use.txt'
 feature_stats = dataPath_ + '/path_stats.txt'
 relationId_path = '../NELL-995/relation2id.txt'
 
+
 def train(kb, kb_inv, named_paths):
 	f = open(dataPath_ + '/train.pairs')
 	train_data = f.readlines()

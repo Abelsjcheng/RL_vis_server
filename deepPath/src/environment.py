@@ -23,8 +23,8 @@ class KGEnvironment(object):
         for line in self.relation2id:
             self.relation2id_[line.split()[0]] = int(line.split()[1])
             self.relations.append(line.split()[0])
-        self.entity2vec = np.loadtxt(os.path.join(settings.BASE_DIR + '\\deepPath\\' + dataPath + '\\entity2vec.bern'))
-        self.relation2vec = np.loadtxt(os.path.join(settings.BASE_DIR + '\\deepPath\\' + dataPath + '\\relation2vec.bern'))
+        self.entity2vec = np.loadtxt(os.path.join(settings.BASE_DIR + '/deepPath/' + dataPath + '/entity2vec.bern'))
+        self.relation2vec = np.loadtxt(os.path.join(settings.BASE_DIR + '/deepPath/' + dataPath + '/relation2vec.bern'))
 
         self.path = []
         self.path_relations = []
