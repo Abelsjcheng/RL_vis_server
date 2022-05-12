@@ -22,4 +22,6 @@ urlpatterns = [
     path('get_sub_graph/', views.get_sub_graph),
     path('get_test_data/', views.get_test_data),
     path('get_path_stats/', views.get_path_stats),
+    path('get_similar_json/', views.get_similar_json),
+    path('get_prediction_result/', views.get_prediction_result),
 ]

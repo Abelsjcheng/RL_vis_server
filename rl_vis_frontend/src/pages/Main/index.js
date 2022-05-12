@@ -31,11 +31,11 @@ class IndexPage extends React.Component {
         return (
             <div className="App">
                 <Layout>
-                    <Sider style={{ background: '#fff' }} width={300}>
+                    <Sider style={{ background: '#fff', position: 'fixed', left: 0, top: 0, bottom: 0, overflow: 'auto' }} width={300}>
                         <div className='rl-title'>RL关系预测</div>
                         <SidePanel getKgRef={kgRef} kgData={kgData} curTriple={curTriple}  ></SidePanel>
                     </Sider>
-                    <Layout >
+                    <Layout style={{ marginLeft: '300px' }}>
                         <Header
                             style={{
                                 width: '100%',

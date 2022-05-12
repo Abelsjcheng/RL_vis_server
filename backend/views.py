@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 import json
 from deepPath.src.DFS import dfs
+from deepPath.src.find_entity_similar import get_similar_entities
+from deepPath.src.fact_prediction import factPrediction
 from django.conf import settings
 import os
 
@@ -57,3 +59,29 @@ def get_path_stats(request):
             return HttpResponse(json.dumps({'state': 200, 'data': list(stats)}), content_type='application/json')
         except:
             return HttpResponse(json.dumps({'state': 500, 'data': None}), content_type='application/json')
+
+
+def get_similar_json(request):
+    if request.method == 'GET':
+        entity_name = request.GET.get("sourceEntity")
+        cos_score_sort = get_similar_entities(entity_name)
+        try:
+            return HttpResponse(json.dumps({'state': 200, 'data': cos_score_sort}), content_type='application/json')
+        except:
+            return HttpResponse(json.dumps({'state': 500, 'data': None}), content_type='application/json')
+
+
+def get_prediction_result(request):
+    if request.method == 'GET':
+        sample = request.GET.get("sample")
+        sample = json.loads(sample)
+        relation = sample["relation"]
+        feature_stats = request.GET.getlist("path_stats[]")
+        relation = '_'.join(relation.split(':'))
+        fact_prediction = factPrediction(relation)
+        nodes, links, existPathIdx = fact_prediction.prediction(sample, feature_stats)
+        try:
+            return HttpResponse(json.dumps({'state': 200, 'data': {"existPathNodes": nodes, "existPathLinks": links, "existPathIdx": existPathIdx}}), content_type='application/json')
+        except:
+            return HttpResponse(json.dumps({'state': 500, 'data': None}), content_type='application/json')
+

@@ -479,16 +479,18 @@ class Kg extends React.Component {
             setTimeout(resolve, wait)
         })
     }
-    handleHightLightPath(path) {
+    handleHightLightPath(nodes, links) {
         const { svgStyle } = this.state
         this.clearSvg()
-        path.forEach(action => {
-            d3.select(`#link${action.link_id}`)
-                .style("stroke", "yellow")
-                .style("stroke-width", svgStyle.linkWidth * 3)
-            d3.select(`#node${action.et_id}`)
+        nodes.forEach(id => {
+            d3.select(`#node${id}`)
                 .select('.node')
                 .style("fill", "green")
+        })
+        links.forEach(id => {
+            d3.select(`#link${id}`)
+                .style("stroke", "yellow")
+                .style("stroke-width", svgStyle.linkWidth * 3)
         })
     }
     handleKgSettingChange = (set, setType) => {
