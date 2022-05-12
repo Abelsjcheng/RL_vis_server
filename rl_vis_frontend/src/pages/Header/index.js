@@ -93,26 +93,26 @@ class HeaderPanel extends React.Component {
         const dataSetOptions = dataSet.map(d => <Option key={d}>{d}</Option>);
         const taskOptions = relationTasks.map(d => <Option key={d}>{d}</Option>);
         const positiveOptions = [], negativeOptions = []
-        testData.forEach(d => d[2] ? positiveOptions.push(<Option key={d} title={`(${d[0]}, ? , ${d[1]})`}>+: {d[0]}</Option>) : negativeOptions.push(<Option key={d} title={`(${d[0]}, ? , ${d[1]})`}>-: {d[0]}</Option>))
+        testData.forEach(d => d[2] ? positiveOptions.push(<Option key={d.join(',')} value={d.join(',')} title={`(${d[0]}, ? , ${d[1]})`}>+: {d[0]}</Option>) : negativeOptions.push(<Option key={d.join(',')} value={d.join(',')} title={`(${d[0]}, ? , ${d[1]})`}>-: {d[0]}</Option>))
 
         return (
             <>
                 <Row gutter={[0, 4]} justify="space-between">
                     <Col span={4} >
                         <label className='select-label'>数据集:</label>
-                        <Select defaultValue={curDataSet} value={curDataSet} style={{ maxWidth: 120 }} onChange={value => this.handleChange(value, "curDataSet")}>
+                        <Select defaultValue={curDataSet} value={curDataSet} style={{ width: 120 }} onChange={value => this.handleChange(value, "curDataSet")}>
                             {dataSetOptions}
                         </Select>
                     </Col>
                     <Col span={7} >
                         <label className='select-label'>预测任务:</label>
-                        <Select defaultValue={curTask} value={curTask} style={{ maxWidth: 250 }} onChange={value => this.handleChange(value, "curTask")}>
+                        <Select defaultValue={curTask} value={curTask} style={{ width: 250 }} onChange={value => this.handleChange(value, "curTask")}>
                             {taskOptions}
                         </Select>
                     </Col>
                     <Col span={7} >
                         <label className='select-label'>测试集:</label>
-                        <Select showSearch defaultValue={curTestSample} value={curTestSample} style={{ maxWidth: 250 }} onChange={value => this.handleChange(value, "curTestSample")}>
+                        <Select showSearch defaultValue={curTestSample} value={curTestSample} style={{ width: 250 }} onChange={value => this.handleChange(value, "curTestSample")}>
                             <OptGroup label="正样本">
                                 {positiveOptions}
                             </OptGroup>
@@ -123,7 +123,7 @@ class HeaderPanel extends React.Component {
                     </Col>
                     <Col span={3} >
                         <label className='select-label'>子图大小:</label>
-                        <Select defaultValue={curHop} value={curHop} style={{ maxWidth: 50 }} onChange={value => this.handleChange(value, "curHop")}>
+                        <Select defaultValue={curHop} value={curHop} style={{ width: 50 }} onChange={value => this.handleChange(value, "curHop")}>
                             {
                                 [1, 2, 3, 4].map(d => <Option key={d}>{d}</Option>)
                             }
