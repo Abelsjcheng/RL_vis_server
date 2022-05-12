@@ -10,6 +10,7 @@ import './index.scss'
 class SidePanel extends React.Component {
     constructor(props) {
         super(props);
+        this.extraSubGraphs = []
         this.state = {
             pathStatsList: [],
             checkedPathList: [],
@@ -18,7 +19,6 @@ class SidePanel extends React.Component {
             rankSimilarEntities: [],
             similarEntitiesLoading: false,
             predictionLoading: false,
-            extraSubGraphs: [],
             subGraphLoading: false
         };
     }
@@ -26,15 +26,9 @@ class SidePanel extends React.Component {
         // this.getPathStats()
     }
     componentDidUpdate(prevProps, prevState) {
-        const { curTriple, onMainStateChange } = this.props;
-        const { extraSubGraphs } = this.state
+        const { curTriple } = this.props;
         if (prevProps.curTriple !== curTriple) {
             this.getPathStats(curTriple.relation)
-        }
-        if (prevState.extraSubGraphs.length !== extraSubGraphs.length) {
-            onMainStateChange({
-                extraSubGraphs: extraSubGraphs
-            })
         }
 
     }
@@ -118,16 +112,21 @@ class SidePanel extends React.Component {
             })
     }
     handleSubGraphLoad = (entityName) => {
-        const { curTriple, getExtrakgRefs } = this.props,
-            { extraSubGraphs } = this.state,
-            triple = Object.assign(curTriple, { sourceEntity: entityName })
-        const subGraphs = [...extraSubGraphs]
+        const { curTriple, getExtrakgRefs, onMainStateChange } = this.props;
         if (!getExtrakgRefs[entityName]) {
+            let triple = {
+                sourceEntity: entityName,
+                relation: curTriple.relation,
+                targetEntity: curTriple.targetEntity
+            }
             this.setState({ subGraphLoading: true })
             getSubGraph(triple, 3).then(value => {
                 if (value) {
-                    subGraphs.push({ "triple": triple, "kgData": value })
-                    this.setState({ extraSubGraphs: subGraphs, subGraphLoading: false })
+                    this.extraSubGraphs.push({ "simTriple": triple, "kgData": value })
+                    onMainStateChange({
+                        extraSubGraphs: this.extraSubGraphs
+                    })
+                    this.setState({ subGraphLoading: false })
                 }
             }).catch(error => {
                 message.error(error.message)
@@ -141,8 +140,12 @@ class SidePanel extends React.Component {
     handleSubGraphStatsPath = (entityName) => {
         const { pathStatsList } = this.state
         const { curTriple, getExtrakgRefs } = this.props
-        let triple = Object.assign(curTriple, { sourceEntity: entityName })
         if (getExtrakgRefs[entityName]) {
+            let triple = {
+                sourceEntity: entityName,
+                relation: curTriple.relation,
+                targetEntity: curTriple.targetEntity
+            }
             this.setState({ predictionLoading: true })
             axios.get("/get_prediction_result", {
                 params: { sample: triple, path_stats: pathStatsList.map(item => item.path) }

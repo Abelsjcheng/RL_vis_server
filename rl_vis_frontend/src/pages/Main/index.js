@@ -66,8 +66,8 @@ class IndexPage extends React.Component {
                                     {
                                         extraSubGraphs.map(subGraph => {
                                             return (
-                                                <Col key={subGraph.triple.sourceEntity} span={12} className="rl-view-content-graph">
-                                                    <Kg onRef={ref => (this.setState({ extrakgRefs: {...extrakgRefs, [subGraph.triple.sourceEntity]: ref } }))} kgData={subGraph.kgData} curTriple={subGraph.triple} ></Kg> 
+                                                <Col key={subGraph.simTriple.sourceEntity} span={12} className="rl-view-content-graph">
+                                                    <Kg onRef={ref => (this.setState({ extrakgRefs: {...extrakgRefs, [subGraph.simTriple.sourceEntity]: ref } }))} kgData={subGraph.kgData} curTriple={subGraph.simTriple} ></Kg> 
                                                 </Col>
                                             )
                                         })
