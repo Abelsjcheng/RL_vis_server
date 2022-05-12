@@ -445,9 +445,9 @@ class Kg extends React.Component {
             .on('end', dragended);
     }
     handleSvgClick = (e) => {
-        if (e.target.nodeName === "svg") {
-            this.clearSvg()
-        }
+        // if (e.target.nodeName === "svg") {
+        //     this.clearSvg()
+        // }
     }
     clearSvg() {
         const { svgStyle } = this.state
