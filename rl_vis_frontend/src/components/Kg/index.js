@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import * as d3 from 'd3'
 import KgSettingPanel from '../KgSettingsPanel/index'
 import { forceManyBodyReuse } from 'd3-force-reuse'
@@ -97,14 +98,15 @@ class Kg extends React.Component {
         // // 返回 null 表示无需更新 state。
         // return null;
     }
-    initSvg = () => {
+    initSvg() {
 
         this.svgWidth = this.kgNetwork.current.offsetWidth
         this.svgHeight = this.kgNetwork.current.offsetHeight
         // 加载缩放
         this.zoom.scaleExtent([0.1, 4]).on('zoom', this.zoomed);
 
-        this.svg = d3.select('.kg-network')
+        const svgDOm = ReactDOM.findDOMNode(this);
+        this.svg = d3.select(svgDOm)
             .append("svg")
             .attr("width", this.svgWidth)
             .attr("height", this.svgHeight)
@@ -483,12 +485,12 @@ class Kg extends React.Component {
         const { svgStyle } = this.state
         this.clearSvg()
         nodes.forEach(id => {
-            d3.select(`#node${id}`)
+            this.svg.select(`#node${id}`)
                 .select('.node')
                 .style("fill", "green")
         })
         links.forEach(id => {
-            d3.select(`#link${id}`)
+            this.svg.select(`#link${id}`)
                 .style("stroke", "yellow")
                 .style("stroke-width", svgStyle.linkWidth * 3)
         })

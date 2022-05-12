@@ -58,9 +58,13 @@ class factPrediction(object):
 				nodes = nodes | entity_list1
 				links = links | path_list1
 				existPath.append(index)
-		nodes.remove(self.entity2id[sample["sourceEntity"]])
-		nodes.remove(self.entity2id[sample["targetEntity"]])
-		return list(nodes), list(links), existPath
+		print(nodes)
+		if nodes is not None and links is not None:
+			nodes.remove(self.entity2id[sample["sourceEntity"]])
+			nodes.remove(self.entity2id[sample["targetEntity"]])
+			return list(nodes), list(links), existPath
+		else:
+			return None, None, None
 
 	def BFS(self, kb, entity1, entity2, path):
 		res = foundPaths(kb)

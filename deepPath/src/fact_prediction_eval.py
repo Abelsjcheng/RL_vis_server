@@ -234,17 +234,30 @@ print('TransR: ', ap2)
 
 
 correct = 0
-count = 0
 ranks = []
-
+fails = {}
+TP = 0
+FP = 0
+FN = 0
+TN = 0
 for idx, item in enumerate(rank_stats_rl):
 	if item[1] == 1:
 		correct += 1
 		ranks.append(correct/(1.0+idx))
-	if item[1] == 1 and item[0] > 1:
-		count += 1
+		if item[0] > 0:
+			TP += 1
+		else:
+			FN += 1
+			fails[test_pairs[idx][0]] = test_pairs[idx][1]
+	if item[1] == 0:
+		if item[0] > 0:
+			FP += 1
+		else:
+			TN += 1
 
-print(count/correct)
+print("Precision:", TP / (TP + FP))
+print("Recall：", TP / (TP + FN))
+print("accuracy：", (TP + TN) / (TP + TN + FP + FN))
 ap3 = np.mean(ranks)
 print('RL: ', ap3)
 

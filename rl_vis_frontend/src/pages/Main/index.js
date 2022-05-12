@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Spin, message, Layout } from 'antd';
+import { Spin, message, Layout, Row, Col } from 'antd';
 import Kg from '../../components/Kg/index'
 import SidePanel from '../Side/index'
 import HeaderPanel from '../Header/index'
@@ -14,7 +14,9 @@ class IndexPage extends React.Component {
             kgData: null,
             isLoaded: false,
             curTriple: null,
-            kgRef: null
+            kgRef: null,
+            extraSubGraphs: [],
+            extrakgRefs: {}
         };
     }
     componentDidMount() {
@@ -27,13 +29,13 @@ class IndexPage extends React.Component {
         this.setState(nextstates)
     }
     render() {
-        const { kgData, curTriple, isLoaded, kgRef } = this.state
+        const { kgData, curTriple, isLoaded, kgRef, extraSubGraphs, extrakgRefs } = this.state
         return (
             <div className="App">
-                <Layout>
+                <Layout hasSider>
                     <Sider style={{ background: '#fff', position: 'fixed', left: 0, top: 0, bottom: 0, overflow: 'auto' }} width={300}>
                         <div className='rl-title'>RL关系预测</div>
-                        <SidePanel getKgRef={kgRef} kgData={kgData} curTriple={curTriple}  ></SidePanel>
+                        <SidePanel getKgRef={kgRef} getExtrakgRefs={extrakgRefs} kgData={kgData} curTriple={curTriple} onMainStateChange={this.handelMainStateChange}  ></SidePanel>
                     </Sider>
                     <Layout style={{ marginLeft: '300px' }}>
                         <Header
@@ -48,6 +50,7 @@ class IndexPage extends React.Component {
                             style={{
                                 padding: 24,
                                 margin: 0,
+                                overflow: 'initial'
                             }}
                         >
                             <div
@@ -56,7 +59,21 @@ class IndexPage extends React.Component {
                                     minHeight: 600,
                                 }}
                             >
-                                {isLoaded ? <Kg onRef={ref => (this.setState({ kgRef: ref }))} kgData={kgData} curTriple={curTriple} ></Kg> : <Spin size="large" />}
+                                <Row gutter={[4, 4]} justify="space-between">
+                                    <Col span={12} className="rl-view-content-graph" >
+                                        {isLoaded ? <Kg onRef={ref => (this.setState({ kgRef: ref }))} kgData={kgData} curTriple={curTriple} ></Kg> : <Spin size="large" />}
+                                    </Col>
+                                    {
+                                        extraSubGraphs.map(subGraph => {
+                                            return (
+                                                <Col key={subGraph.triple.sourceEntity} span={12} className="rl-view-content-graph">
+                                                    <Kg onRef={ref => (this.setState({ extrakgRefs: {...extrakgRefs, [subGraph.triple.sourceEntity]: ref } }))} kgData={subGraph.kgData} curTriple={subGraph.triple} ></Kg> 
+                                                </Col>
+                                            )
+                                        })
+                                    }
+                                </Row>
+
                             </div>
                         </Content>
                     </Layout>

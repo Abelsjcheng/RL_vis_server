@@ -10,8 +10,7 @@ class HeaderPanel extends React.Component {
         super(props);
         this.state = {
             dataSet: [
-                "NELL-995",
-                "123"
+                "NELL-995"
             ],
             curDataSet: "NELL-995",
             relationTasks: [
@@ -63,7 +62,9 @@ class HeaderPanel extends React.Component {
                 onMainStateChange({
                     curTriple: triple,
                     kgData: value,
-                    isLoaded: true
+                    isLoaded: true,
+                    extraSubGraphs: [],
+                    extrakgRefs: {}
                 })
             }
             this.setState({subGraphLoading: false})
