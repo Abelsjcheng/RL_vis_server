@@ -4,9 +4,9 @@ import json
 from deepPath.src.DFS import dfs
 from deepPath.src.find_entity_similar import get_similar_entities
 from deepPath.src.fact_prediction import factPrediction
+from deepPath.src.subgraph_support_sort import subGraphSupportSort
 from django.conf import settings
 import os
-
 # Create your views here.
 
 
@@ -76,12 +76,26 @@ def get_prediction_result(request):
         sample = request.GET.get("sample")
         sample = json.loads(sample)
         relation = sample["relation"]
-        feature_stats = request.GET.getlist("path_stats[]")
+        feature_paths = request.GET.getlist("path_stats[]")
         relation = '_'.join(relation.split(':'))
         fact_prediction = factPrediction(relation)
-        nodes, links, existPathIdx = fact_prediction.prediction(sample, feature_stats)
+        nodes, links, existPathIdx = fact_prediction.prediction(sample, feature_paths)
         try:
             return HttpResponse(json.dumps({'state': 200, 'data': {"existPathNodes": nodes, "existPathLinks": links, "existPathIdx": existPathIdx}}), content_type='application/json')
         except:
             return HttpResponse(json.dumps({'state': 500, 'data': None}), content_type='application/json')
 
+
+def get_subgraph_support_sort(request):
+    if request.method == 'GET':
+        entities = request.GET.getlist("entities[]")
+        feature_paths = request.GET.getlist("path_stats[]")
+        relation = request.GET.get("relation")
+        relation = '_'.join(relation.split(':'))
+        targetEntity = request.GET.get("targetEntity")
+        subGraph_support_sort = subGraphSupportSort(relation)
+        subGraph_score_sort = subGraph_support_sort.get_subgraph_sort(entities, targetEntity, feature_paths)
+        try:
+            return HttpResponse(json.dumps({'state': 200, 'data': subGraph_score_sort}), content_type='application/json')
+        except:
+            return HttpResponse(json.dumps({'state': 500, 'data': None}), content_type='application/json')

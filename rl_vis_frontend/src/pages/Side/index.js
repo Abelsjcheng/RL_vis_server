@@ -2,11 +2,12 @@
 import React, { forwardRef } from 'react';
 import axios from '../../assets/http'
 import { splitLinkName, splitNodeName } from '../../util/tool'
-import { Button, Row, Col, message, List, Divider, Checkbox, Badge, Popover } from 'antd';
+import { Button, Row, Col, message, List, Divider, Checkbox, Badge, Popover, Dropdown, Menu, Radio } from 'antd';
 import VirtualList from 'rc-virtual-list';
 import { getSubGraph } from '../../util/tool'
+import { DownOutlined } from '@ant-design/icons';
+import PathVis from '../../components/Sider/PathVis'
 import './index.scss'
-
 class SidePanel extends React.Component {
     constructor(props) {
         super(props);
@@ -19,7 +20,10 @@ class SidePanel extends React.Component {
             rankSimilarEntities: [],
             similarEntitiesLoading: false,
             predictionLoading: false,
-            subGraphLoading: false
+            subGraphLoading: false,
+            dropDownVisible: false,
+            sortMethodchecked: "实体相似度",
+            sortLoading: false
         };
     }
     componentDidMount() {
@@ -81,7 +85,7 @@ class SidePanel extends React.Component {
                 }
             })
             .catch(error => {
-                message.error("查询推理路径失败！")
+                message.error("查询相似实体失败！")
                 this.setState({ similarEntitiesLoading: false })
             })
     }
@@ -97,11 +101,11 @@ class SidePanel extends React.Component {
                     const { existPathNodes, existPathLinks, existPathIdx } = data.data
                     if (existPathNodes !== null) {
                         getKgRef.handleHightLightPath(existPathNodes, existPathLinks)
-                        const existPath = existPathIdx.map(id => checkedPathList[id])
+                        const existPath = existPathIdx.map(idx => checkedPathList[idx])
                         this.setState({ predictionLoading: false, checkedPathList: existPath })
                     } else {
                         message.error("无符合的推理路径！")
-                        this.setState({ predictionLoading: false })
+                        this.setState({ predictionLoading: false, checkedPathList: [] })
                     }
 
                 }
@@ -132,7 +136,7 @@ class SidePanel extends React.Component {
                 message.error(error.message)
                 this.setState({ subGraphLoading: false })
             })
-        }else{
+        } else {
             message.error("子图已加载！")
         }
 
@@ -171,8 +175,96 @@ class SidePanel extends React.Component {
         }
 
     }
+    handleSubGrpahSupportSort = (e) => {
+        const { pathStatsList, rankSimilarEntities } = this.state
+        const { curTriple } = this.props
+        this.setState({ dropDownVisible: true, sortLoading: true })
+        axios.get("/get_subgraph_support_sort", {
+            params: {
+                entities: rankSimilarEntities.map(entity => entity.entityName),
+                path_stats: pathStatsList,
+                relation: curTriple.relation,
+                targetEntity: curTriple.targetEntity
+            }
+        })
+            .then(({ data }) => {
+                if (data.state === 200) {
+                    this.setState({ rankSimilarEntities: data.data, sortLoading: false })
+                }
+            })
+            .catch(error => {
+                message.error("排序失败！")
+                this.setState({ sortLoading: false })
+            })
+    };
+    handleSort = e => {
+        const { sortMethodchecked } = this.state
+        switch (sortMethodchecked) {
+            case "实体相似度":
+
+                break;
+            case "子图支持度":
+                this.handleSubGrpahSupportSort()
+                break; 
+            case "推理路径覆盖率":
+
+                break;
+            case "联合排序":
+
+                break;
+            default:
+                break;
+        }
+    }
+    handleCheckSortMethod = (e) => {
+        this.setState({ dropDownVisible: true, sortMethodchecked: e.target.value })
+    }
+    handleDropDownVisibleChange = (flag) => {
+        this.setState({ dropDownVisible: flag })
+    }
     render() {
-        const { pathStatsList, checkedPathList, rankSimilarEntities, similarEntitiesLoading, checkAllFlag, indeterminate, predictionLoading, subGraphLoading } = this.state
+        const { pathStatsList, checkedPathList, rankSimilarEntities, similarEntitiesLoading, checkAllFlag, indeterminate, predictionLoading, subGraphLoading, dropDownVisible, sortMethodchecked, sortLoading } = this.state
+        const menu = (
+            <List
+                size="small"
+                loadMore={
+                    <div
+                        style={{
+                            margin: '6px 0',
+                            textAlign: 'center',
+                        }}
+                    >
+                        <Button size='small' onClick={this.handleSort} loading={sortLoading} >
+                            排序
+                        </Button>
+                    </div>
+                }>
+
+                <List.Item style={{ padding: 0 }}>
+                    <Radio.Group onChange={this.handleCheckSortMethod} value={sortMethodchecked} >
+                        <Menu>
+                            <Menu.Item key='0' style={{ margin: 0 }}>
+                                <Radio value="实体相似度" >实体相似度</Radio>
+                            </Menu.Item>
+                            <Menu.Item key='1' style={{ margin: 0 }}>
+                                <Radio value="子图支持度" >子图支持度</Radio>
+                            </Menu.Item>
+                            <Menu.Item key='2' style={{ margin: 0 }}>
+                                <Radio value="推理路径覆盖率" >推理路径覆盖率</Radio>
+                            </Menu.Item>
+                            <Menu.Item key='3' style={{ margin: 0 }}>
+                                <Radio value="联合排序" >联合排序</Radio>
+                            </Menu.Item>
+                            <Menu.Divider></Menu.Divider>
+                        </Menu>
+                    </Radio.Group>
+                </List.Item>
+
+
+            </List>
+
+        );
+
         return (
             <div className="rl-view-sider">
                 <Divider orientation="left">推理路径</Divider>
@@ -202,7 +294,15 @@ class SidePanel extends React.Component {
                                         <Badge count={item.weight} />
                                     }
                                 >
-                                    <Checkbox value={item.path}>{item.path}</Checkbox>
+                                    <Checkbox value={item.path}></Checkbox>
+                                    <Popover
+                                        placement="right"
+                                        title={<span style={{ fontSize: "16px" }}>证据信息(来源RL训练集)</span>}
+                                        content={<PathVis path={item.path} />}
+                                        trigger="click"
+                                    >
+                                        <span style={{ padding: "0 8px" }}>{item.path}</span>
+                                    </Popover>
 
                                 </List.Item>
                             )}
@@ -213,10 +313,18 @@ class SidePanel extends React.Component {
                 <Divider orientation="left">辅助信息</Divider>
                 <List
                     header={
-                        <div style={{ display: "flex", justifyContent: "space-between" }} >
-                            <Button onClick={this.getSimilarEntities} loading={similarEntitiesLoading}>
+                        <div style={{ display: "flex", justifyContent: "center" }} >
+                            <Dropdown.Button
+                                icon={<DownOutlined />}
+                                loading={similarEntitiesLoading}
+                                overlay={menu}
+                                onClick={this.getSimilarEntities}
+                                onVisibleChange={this.handleDropDownVisibleChange}
+                                visible={dropDownVisible}
+                            >
                                 查询相似实体
-                            </Button>
+                            </Dropdown.Button>
+
                         </div>
                     }
                     bordered
@@ -230,7 +338,7 @@ class SidePanel extends React.Component {
                             return (
                                 <List.Item style={{ width: '100%' }}
                                     extra={
-                                        <Badge count={item.similarity} />
+                                        <Badge count={item.score} />
                                     }
                                 >
                                     <label>{index + 1}. </label>
@@ -259,5 +367,4 @@ class SidePanel extends React.Component {
         );
     }
 }
-
 export default SidePanel;

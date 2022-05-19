@@ -106,7 +106,7 @@ class HeaderPanel extends React.Component {
                     </Col>
                     <Col span={7} >
                         <label className='select-label'>预测任务:</label>
-                        <Select defaultValue={curTask} value={curTask} style={{ width: 250 }} onChange={value => this.handleChange(value, "curTask")}>
+                        <Select defaultValue={curTask} value={curTask} style={{ width: 230 }} onChange={value => this.handleChange(value, "curTask")}>
                             {taskOptions}
                         </Select>
                     </Col>

@@ -36,9 +36,9 @@ class Kg extends React.Component {
             svgStyle: {
                 linkWidth: 1,
                 linkStroke: '#D3D3D3', // 边颜色
-                linkLabelSize: 13,
+                linkLabelSize: 8,
                 nodeColor: '#DE9BF9',
-                nodeLabelSize: 14
+                nodeLabelSize: 10
             },
             switchSet: {
                 showNodeText: false, // 显示隐藏节点标签
@@ -296,7 +296,6 @@ class Kg extends React.Component {
         const { svgStyle, forceSet, switchSet } = this.state
 
         this.updateLink
-            .style("stroke", svgStyle.linkStroke)
             .style("stroke-width", svgStyle.linkWidth)
 
         this.marker
@@ -374,7 +373,7 @@ class Kg extends React.Component {
                     } else {
                         let radian = Math.atan((d.target.y - d.source.y) / (d.target.x - d.source.x)),
                             angle = Math.floor(180 / (Math.PI / radian));
-                        return `translate(${((d.source.x + d.target.x) / 2).toFixed(2)},${((d.source.y + d.target.y) / 2).toFixed(2)}) rotate(${angle.toFixed(2)})`
+                        return `translate(${((d.source.x + d.target.x) / 2).toFixed(2)},${((d.source.y + d.target.y) / 2 + d.linknum*10).toFixed(2)}) rotate(${angle.toFixed(2)})`
 
                     }
                 });

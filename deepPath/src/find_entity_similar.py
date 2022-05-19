@@ -27,8 +27,8 @@ def get_similar_entities(sourceEntity):
     for entity, entity_id_ in env.entity2id_.items():
         tmp_entity_vec = env.entity2vec[entity_id_, :]
         cos_similarity = cosine_similarity(entity_vec.tolist(), tmp_entity_vec.tolist())
-        cos_score.append({"entityName": entity, "similarity": round(cos_similarity, 2)})
+        cos_score.append({"entityName": entity, "score": round(cos_similarity, 2)})
 
-    cos_score_sort = sorted(cos_score, key=lambda x: x["similarity"], reverse=True)
+    cos_score_sort = sorted(cos_score, key=lambda x: x["score"], reverse=True)
     return cos_score_sort[1:51]
 

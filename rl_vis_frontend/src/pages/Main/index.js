@@ -33,11 +33,11 @@ class IndexPage extends React.Component {
         return (
             <div className="App">
                 <Layout hasSider>
-                    <Sider style={{ background: '#fff', position: 'fixed', left: 0, top: 0, bottom: 0, overflow: 'auto' }} width={300}>
+                    <Sider style={{ background: '#fff', position: 'fixed', left: 0, top: 0, bottom: 0, overflow: 'auto' }} width={340}>
                         <div className='rl-title'>RL关系预测</div>
                         <SidePanel getKgRef={kgRef} getExtrakgRefs={extrakgRefs} kgData={kgData} curTriple={curTriple} onMainStateChange={this.handelMainStateChange}  ></SidePanel>
                     </Sider>
-                    <Layout style={{ marginLeft: '300px' }}>
+                    <Layout style={{ marginLeft: '340px' }}>
                         <Header
                             style={{
                                 width: '100%',
