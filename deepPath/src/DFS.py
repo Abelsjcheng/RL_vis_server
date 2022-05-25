@@ -108,6 +108,7 @@ def dfs(sourceEntity, relation, targetEntity, hop):
                 cutdowndualstack(mainStack, neighborStack, visited)
 
     findallpath(sourceEntity, targetEntity)
+
     return paths, {"nodes": datafilter(nodes), "links": datafilter(links)}
 
 

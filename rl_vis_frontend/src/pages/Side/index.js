@@ -98,16 +98,20 @@ class SidePanel extends React.Component {
         })
             .then(({ data }) => {
                 if (data.state === 200) {
-                    const { existPathNodes, existPathLinks, existPathIdx } = data.data
+
+                    const { existPathNodes, existPathLinks, existPathIdx, prediction_link, existNodes, existLinks } = data.data
                     if (existPathNodes !== null) {
-                        getKgRef.handleHightLightPath(existPathNodes, existPathLinks)
+                        getKgRef.handleHightLightPath(existPathNodes, existPathLinks, prediction_link, existNodes, existLinks)
                         const existPath = existPathIdx.map(idx => checkedPathList[idx])
                         this.setState({ predictionLoading: false, checkedPathList: existPath })
                     } else {
+                        getKgRef.handleHightLightPath([], [], prediction_link)
                         message.error("无符合的推理路径！")
                         this.setState({ predictionLoading: false, checkedPathList: [] })
                     }
 
+                } else {
+                    this.setState({ predictionLoading: false })
                 }
             })
             .catch(error => {
@@ -205,7 +209,7 @@ class SidePanel extends React.Component {
                 break;
             case "子图支持度":
                 this.handleSubGrpahSupportSort()
-                break; 
+                break;
             case "推理路径覆盖率":
 
                 break;
@@ -264,7 +268,15 @@ class SidePanel extends React.Component {
             </List>
 
         );
-
+        const colors = [
+            "#d7c060", 
+            "#00FFFF",
+            'pink',
+            'cyan',
+            'magenta',
+            'gold',
+            'lime',
+        ]
         return (
             <div className="rl-view-sider">
                 <Divider orientation="left">推理路径</Divider>
@@ -284,33 +296,35 @@ class SidePanel extends React.Component {
                     <Checkbox.Group style={{ width: '100%' }} onChange={this.oncheckedPathChange} value={checkedPathList}  >
                         <VirtualList
                             data={pathStatsList}
-                            height={400}
+                            height={500}
                             itemKey="path"
 
                         >
-                            {item => (
-                                <List.Item style={{ width: '100%', wordBreak: 'break-word' }}
-                                    extra={
-                                        <Badge count={item.weight} />
-                                    }
-                                >
-                                    <Checkbox value={item.path}></Checkbox>
-                                    <Popover
-                                        placement="right"
-                                        title={<span style={{ fontSize: "16px" }}>证据信息(来源RL训练集)</span>}
-                                        content={<PathVis path={item.path} />}
-                                        trigger="click"
+                            {(item, index) => {
+                                return (
+                                    <List.Item style={{ width: '100%', wordBreak: 'break-word' }}
+                                        extra={
+                                            <Badge count={item.weight} style={{ backgroundColor: colors[index] }}  />
+                                        }
                                     >
-                                        <span style={{ padding: "0 8px" }}>{item.path}</span>
-                                    </Popover>
+                                        <Checkbox value={item.path}></Checkbox>
+                                        <Popover
+                                            placement="right"
+                                            title={<span style={{ fontSize: "16px" }}>证据信息(来源RL训练集)</span>}
+                                            content={<PathVis path={item.path} />}
+                                            trigger="click"
+                                        >
+                                            <span style={{ padding: "0 8px" }}>{item.path}</span>
+                                        </Popover>
 
-                                </List.Item>
-                            )}
+                                    </List.Item>
+                                )
+                            }}
 
                         </VirtualList>
                     </Checkbox.Group>
                 </List>
-                <Divider orientation="left">辅助信息</Divider>
+                {/* <Divider orientation="left">辅助信息</Divider>
                 <List
                     header={
                         <div style={{ display: "flex", justifyContent: "center" }} >
@@ -362,7 +376,7 @@ class SidePanel extends React.Component {
                         }}
 
                     </VirtualList>
-                </List>
+                </List> */}
             </div>
         );
     }

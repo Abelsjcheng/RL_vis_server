@@ -33,7 +33,7 @@ class IndexPage extends React.Component {
         return (
             <div className="App">
                 <Layout hasSider>
-                    <Sider style={{ background: '#fff', position: 'fixed', left: 0, top: 0, bottom: 0, overflow: 'auto' }} width={340}>
+                    <Sider style={{ background: '#fff', position: 'fixed', left: 0, top: 0, bottom: 0 }} width={340}>
                         <div className='rl-title'>RL关系预测</div>
                         <SidePanel getKgRef={kgRef} getExtrakgRefs={extrakgRefs} kgData={kgData} curTriple={curTriple} onMainStateChange={this.handelMainStateChange}  ></SidePanel>
                     </Sider>
@@ -59,7 +59,8 @@ class IndexPage extends React.Component {
                                     minHeight: 600,
                                 }}
                             >
-                                <Row gutter={[4, 4]} justify="space-between">
+                                {isLoaded ? <Kg onRef={ref => (this.setState({ kgRef: ref }))} kgData={kgData} curTriple={curTriple} ></Kg> : <Spin size="large" />}
+                                {/* <Row gutter={[4, 4]} justify="space-between">
                                     <Col span={12} className="rl-view-content-graph" >
                                         {isLoaded ? <Kg onRef={ref => (this.setState({ kgRef: ref }))} kgData={kgData} curTriple={curTriple} ></Kg> : <Spin size="large" />}
                                     </Col>
@@ -72,7 +73,7 @@ class IndexPage extends React.Component {
                                             )
                                         })
                                     }
-                                </Row>
+                                </Row> */}
 
                             </div>
                         </Content>

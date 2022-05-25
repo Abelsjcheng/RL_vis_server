@@ -42,6 +42,8 @@ class factPrediction(object):
 		nodes = set()
 		links = set()
 		existPath = []
+		existNodes = {}
+		existLinks = {}
 		for index, path in enumerate(statsPaths):
 			pathName = []
 			relations = path.split(' -> ')
@@ -52,14 +54,26 @@ class factPrediction(object):
 				continue
 			entity_list1, path_list1 = self.BFS(sample["sourceEntity"], sample["targetEntity"], pathName)
 			if len(entity_list1) and len(path_list1):
+				entity_list1.remove(self.entity2id[sample["sourceEntity"]])
+				entity_list1.remove(self.entity2id[sample["targetEntity"]])
 				nodes = nodes | entity_list1
 				links = links | path_list1
+				existNodes[index] = list(entity_list1)
+				existLinks[index] = list(path_list1)
 				existPath.append(index)
 
 		if len(nodes) and len(links):
-			nodes.remove(self.entity2id[sample["sourceEntity"]])
-			nodes.remove(self.entity2id[sample["targetEntity"]])
-			return list(nodes), list(links), existPath
+			prediction_link = {
+				'id': str(self.entity2id[sample["sourceEntity"]]) + '-' + str(self.relation2id[sample["relation"]]) + '-' + str(
+					self.entity2id[sample["targetEntity"]]),
+				'name': sample["relation"],
+				'rel_id': self.relation2id[sample["relation"]],
+				'source': self.entity2id[sample["sourceEntity"]],
+				'target': self.entity2id[sample["targetEntity"]],
+				'es_name': sample["sourceEntity"],
+				'et_name': sample["targetEntity"],
+			}
+			return list(nodes), list(links), existPath, prediction_link, existNodes, existLinks
 		else:
 			return None, None, None
 

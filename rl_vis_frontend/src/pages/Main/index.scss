@@ -13,7 +13,8 @@
 
 
 }
-.rl-title{
+
+.rl-title {
     z-index: 1;
     height: 64px;
     display: flex;
@@ -26,11 +27,16 @@
     border-bottom: 2px solid #f5f5f5;
     box-shadow: 0 1px 9px -3px rgba(5, 5, 5, 0.2);
 }
+
 .rl-view-content {
     height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     // flex-grow: 1;
     background-color: #fff;
-    .rl-view-content-graph{
+
+    .rl-view-content-graph {
         display: flex;
         align-items: center;
         justify-content: center;

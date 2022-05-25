@@ -5,10 +5,11 @@ import KgSettingPanel from '../KgSettingsPanel/index'
 import { forceManyBodyReuse } from 'd3-force-reuse'
 import { splitLinkName, splitNodeName } from '../../util/tool'
 import './index.scss'
+
 class Kg extends React.Component {
     constructor(props) {
         super(props);
-        const _kgData = JSON.parse(JSON.stringify(props.kgData));
+        this._kgData = JSON.parse(JSON.stringify(props.kgData));
         this.simulation = d3.forceSimulation();
         this.zoom = d3.zoom();
         this.svg = null;
@@ -26,8 +27,8 @@ class Kg extends React.Component {
         this.svgHeight = null;
         this.kgNetwork = React.createRef();
         this.state = {
-            nodes: _kgData.nodes,
-            links: _kgData.links,
+            nodes: this._kgData.nodes,
+            links: this._kgData.links,
             forceSet: {
                 bodyStrength: -500, // 节点排斥力，负数为模拟电荷力
                 linkDistance: 100, // 边长度
@@ -35,9 +36,14 @@ class Kg extends React.Component {
             },
             svgStyle: {
                 linkWidth: 1,
-                linkStroke: '#D3D3D3', // 边颜色
+                linkStroke: '#A5ABB6', // 边颜色
                 linkLabelSize: 8,
-                nodeColor: '#DE9BF9',
+                nodeColor: '#D3D3D3',
+                nodeStroke: '#ACACAC',
+                sourceNodeColor: "#F16667",
+                sourceNodeStroke: "#EB2728",
+                targetNodeColor: "#4C8EDA",
+                targetNodeStroke: "#2870C2",
                 nodeLabelSize: 10
             },
             switchSet: {
@@ -85,12 +91,11 @@ class Kg extends React.Component {
         const prevkgData = JSON.stringify(this.props.kgData),
             nextKgData = JSON.stringify(nextProps.kgData)
         if (prevkgData !== nextKgData) {
-            const _kgData = JSON.parse(nextKgData),
-                { switchSet } = this.state
-
+            const { switchSet } = this.state
+            this._kgData = JSON.parse(nextKgData)
             this.setState({
-                nodes: _kgData.nodes,
-                links: _kgData.links,
+                nodes: this._kgData.nodes,
+                links: this._kgData.links,
                 switchSet: Object.assign({}, switchSet, { autoZoomFlag: true }),
             });
         }
@@ -263,13 +268,23 @@ class Kg extends React.Component {
         this.updateNode.select('.node')
             .style("fill", d => {
                 if (d.name === curTriple.sourceEntity) {
-                    return "red"
+                    return svgStyle.sourceNodeColor
                 } else if (d.name === curTriple.targetEntity) {
-                    return "blue"
+                    return svgStyle.targetNodeColor
                 } else {
-                    return "#DE9BF9"
+                    return svgStyle.nodeColor
                 }
             })
+            .style("stroke", d => {
+                if (d.name === curTriple.sourceEntity) {
+                    return svgStyle.sourceNodeStroke
+                } else if (d.name === curTriple.targetEntity) {
+                    return svgStyle.targetNodeStroke
+                } else {
+                    return svgStyle.nodeStroke
+                }
+            })
+            .style("stroke-width", 1)
 
         let linkText = this.linkTextGroup.selectAll("text.link-text").data(links, d => d.id);
 
@@ -373,7 +388,7 @@ class Kg extends React.Component {
                     } else {
                         let radian = Math.atan((d.target.y - d.source.y) / (d.target.x - d.source.x)),
                             angle = Math.floor(180 / (Math.PI / radian));
-                        return `translate(${((d.source.x + d.target.x) / 2).toFixed(2)},${((d.source.y + d.target.y) / 2 + d.linknum*10).toFixed(2)}) rotate(${angle.toFixed(2)})`
+                        return `translate(${((d.source.x + d.target.x) / 2).toFixed(2)},${((d.source.y + d.target.y) / 2 + d.linknum * 10).toFixed(2)}) rotate(${angle.toFixed(2)})`
 
                     }
                 });
@@ -433,7 +448,7 @@ class Kg extends React.Component {
 
         function dragended(event, d) {
             if (!event.active) simulation.alphaTarget(0);
-            d.fx = d.x;
+            d.fx = d.x; // fx固定节点
             d.fy = d.y;
         }
 
@@ -459,11 +474,11 @@ class Kg extends React.Component {
             .select('.node')
             .style("fill", d => {
                 if (d.name === curTriple.sourceEntity) {
-                    return "red"
+                    return svgStyle.sourceNodeColor
                 } else if (d.name === curTriple.targetEntity) {
-                    return "blue"
+                    return svgStyle.targetNodeColor
                 } else {
-                    return "#DE9BF9"
+                    return svgStyle.nodeColor
                 }
             })
     }
@@ -480,19 +495,65 @@ class Kg extends React.Component {
             setTimeout(resolve, wait)
         })
     }
-    handleHightLightPath(nodes, links) {
-        const { svgStyle } = this.state
+    handleHightLightPath(snodes, slinks, prediction_link, existNodes, existLinks) {
+
         this.clearSvg()
-        nodes.forEach(id => {
-            this.svg.select(`#node${id}`)
-                .select('.node')
-                .style("fill", "green")
-        })
-        links.forEach(id => {
-            this.svg.select(`#link${id}`)
-                .style("stroke", "yellow")
-                .style("stroke-width", svgStyle.linkWidth * 3)
-        })
+        if (snodes.length > 0 && slinks.length > 0) {
+            let _links = [...this.props.kgData.links]
+            _links.push(prediction_link)
+            const colors = ["#d7c060", "#00FFFF"]
+
+            this.setState({ links: _links }, () => {
+                const { svgStyle, links, nodes } = this.state
+                this.nodeGroup.selectAll("g")
+                    .data(nodes)
+                    .select('.node')
+                    .style("opacity", d => {
+                        if(d.id === prediction_link.source.id || d.id === prediction_link.target.id){
+                            return "1"
+                        }else{
+                            return "0.3"
+                        }
+                    })
+
+                for (let key in existNodes) {
+                    existNodes[key].forEach(id => {
+                        this.svg.select(`#node${id}`)
+                            .select('.node')
+                            .style("fill", colors[key])
+                            .style("opacity", "1")
+                    })
+                }
+                this.svg.selectAll(".link")
+                    .data(links)
+                    .filter(d => d.id !== prediction_link.id)
+                    .style("stroke-opacity", "0.2")
+
+                for (let key in existNodes) {
+                    existLinks[key].forEach(id => {
+                        this.svg.select(`#link${id}`)
+                            .style("stroke", colors[key])
+                            .style("stroke-opacity", "1")
+                    })
+                }
+                this.svg.select(`#link${prediction_link.id}`)
+                    .style("stroke", "green")
+                    .style("stroke-width", svgStyle.linkWidth * 2)
+                    .style("stroke-Dasharray", "4 2")
+            })
+
+        } else {
+            let _links = [...this.props.kgData.links]
+            _links.push(prediction_link)
+            this.setState({ links: _links }, () => {
+                const { svgStyle } = this.state
+                this.svg.select(`#link${prediction_link.id}`)
+                    .style("stroke", "black")
+                    .style("stroke-width", svgStyle.linkWidth * 2)
+                    .style("stroke-Dasharray", "4 2")
+            })
+        }
+
     }
     handleKgSettingChange = (set, setType) => {
         // 控制面板回参
@@ -533,17 +594,7 @@ class Kg extends React.Component {
 }
 
 
-function dataFilter(data) {
-    let map = new Map()
-    return data.filter(item => {
-        if (!map.has(item.id)) {
-            map.set(item.id, item)
-            return true
-        } else {
-            return false
-        }
-    })
-}
+
 
 function setDoubleLink(links) {
 

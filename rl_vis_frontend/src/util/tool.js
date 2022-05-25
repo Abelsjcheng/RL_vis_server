@@ -19,7 +19,7 @@ export async function getSubGraph(triple, hop) {
         .then(({ data }) => {
             if (data.state === 200 && data.data !== null) {
                 result = data.data
-            }else{
+            } else {
                 throw new Error("未查询到子图！")
             }
         })
