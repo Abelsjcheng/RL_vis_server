@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Spin, message, Layout, Row, Col } from 'antd';
-import Kg from '../../components/Kg/index'
+import Kg from '../../components/Kg'
 import SidePanel from '../Side/index'
 import HeaderPanel from '../Header/index'
 import './index.scss'
@@ -13,6 +13,7 @@ class IndexPage extends React.Component {
         this.state = {
             kgData: null,
             isLoaded: false,
+            entitys: null,
             curTriple: null,
             kgRef: null,
             extraSubGraphs: [],
@@ -29,7 +30,7 @@ class IndexPage extends React.Component {
         this.setState(nextstates)
     }
     render() {
-        const { kgData, curTriple, isLoaded, kgRef, extraSubGraphs, extrakgRefs } = this.state
+        const { kgData, curTriple, isLoaded, kgRef, entitys, extraSubGraphs, extrakgRefs } = this.state
         return (
             <div className="App">
                 <Layout hasSider>
@@ -59,7 +60,7 @@ class IndexPage extends React.Component {
                                     minHeight: 600,
                                 }}
                             >
-                                {isLoaded ? <Kg onRef={ref => (this.setState({ kgRef: ref }))} kgData={kgData} curTriple={curTriple} ></Kg> : <Spin size="large" />}
+                                {isLoaded ? <Kg onRef={ref => (this.setState({ kgRef: ref }))} kgData={kgData} curTriple={curTriple} entitys={entitys} ></Kg> : <Spin size="large" />}
                                 {/* <Row gutter={[4, 4]} justify="space-between">
                                     <Col span={12} className="rl-view-content-graph" >
                                         {isLoaded ? <Kg onRef={ref => (this.setState({ kgRef: ref }))} kgData={kgData} curTriple={curTriple} ></Kg> : <Spin size="large" />}

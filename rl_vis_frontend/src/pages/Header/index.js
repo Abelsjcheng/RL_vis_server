@@ -47,7 +47,7 @@ class HeaderPanel extends React.Component {
     handleChange(value, type) {
         this.setState({ [type]: value })
     }
-    handleSubGraphLoad= () => {
+    handleSubGraphLoad = () => {
         const { curTask, curTestSample, curHop } = this.state
         const { onMainStateChange } = this.props
         const curTestSampleArr = curTestSample.split(',')
@@ -56,21 +56,23 @@ class HeaderPanel extends React.Component {
             relation: curTask,
             targetEntity: curTestSampleArr[1]
         }
-        this.setState({subGraphLoading: true})
+        this.setState({ subGraphLoading: true })
         getSubGraph(triple, curHop).then(value => {
-            if(value){
+            if (value) {
+                console.log(value.kgData);
                 onMainStateChange({
                     curTriple: triple,
-                    kgData: value,
+                    kgData: value.kgData,
+                    entitys: value.entitys,
                     isLoaded: true,
                     extraSubGraphs: [],
                     extrakgRefs: {}
                 })
             }
-            this.setState({subGraphLoading: false})
+            this.setState({ subGraphLoading: false })
         }).catch(error => {
             message.error(error.message)
-            this.setState({subGraphLoading: false})
+            this.setState({ subGraphLoading: false })
         })
 
     }

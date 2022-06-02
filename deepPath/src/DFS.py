@@ -42,28 +42,39 @@ def dfs(sourceEntity, relation, targetEntity, hop):
             et_name = action.connected_entity
             rel_name = action.relation
             nodes.append({'id': entity2id_[et_name], 'name': et_name})
-            if not rel_name.endswith('_inv'):
-                links.append({
-                    'id': str(entity2id_[es_name]) + '-' + str(relation2id_[rel_name]) + '-' + str(
-                        entity2id_[et_name]),
-                    'name': rel_name,
-                    'rel_id': relation2id_[rel_name],
-                    'source': entity2id_[es_name],
-                    'target': entity2id_[et_name],
-                    'es_name': es_name,
-                    'et_name': et_name,
-                })
-            else:
-                links.append({
-                    'id': str(entity2id_[et_name]) + '-' + str(relation2id_[rel_name]) + '-' + str(
-                        entity2id_[es_name]),
-                    'name': rel_name,
-                    'rel_id': relation2id_[rel_name],
-                    'source': entity2id_[et_name],
-                    'target': entity2id_[es_name],
-                    'es_name': et_name,
-                    'et_name': es_name,
-                })
+            links.append({
+                'id': str(entity2id_[es_name]) + '-' + str(relation2id_[rel_name]) + '-' + str(
+                    entity2id_[et_name]),
+                'name': rel_name,
+                'rel_id': relation2id_[rel_name],
+                'source': entity2id_[es_name],
+                'target': entity2id_[et_name],
+                'es_name': es_name,
+                'et_name': et_name,
+                'path_order': i
+            })
+            # if not rel_name.endswith('_inv'):
+            #     links.append({
+            #         'id': str(entity2id_[es_name]) + '-' + str(relation2id_[rel_name]) + '-' + str(
+            #             entity2id_[et_name]),
+            #         'name': rel_name,
+            #         'rel_id': relation2id_[rel_name],
+            #         'source': entity2id_[es_name],
+            #         'target': entity2id_[et_name],
+            #         'es_name': es_name,
+            #         'et_name': et_name,
+            #     })
+            # else:
+            #     links.append({
+            #         'id': str(entity2id_[et_name]) + '-' + str(relation2id_[rel_name]) + '-' + str(
+            #             entity2id_[es_name]),
+            #         'name': rel_name,
+            #         'rel_id': relation2id_[rel_name],
+            #         'source': entity2id_[et_name],
+            #         'target': entity2id_[es_name],
+            #         'es_name': et_name,
+            #         'et_name': es_name,
+            #     })
             es_name = et_name
 
     def builddualstack(path, mainStack, neighborStack, visited):

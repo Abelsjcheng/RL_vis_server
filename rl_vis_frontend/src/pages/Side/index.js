@@ -8,6 +8,15 @@ import { getSubGraph } from '../../util/tool'
 import { DownOutlined } from '@ant-design/icons';
 import PathVis from '../../components/Sider/PathVis'
 import './index.scss'
+
+const colors = [
+    "#d7c060",
+    "#00FFFF",
+    'pink',
+    'magenta',
+    'gold',
+    'lime',
+]
 class SidePanel extends React.Component {
     constructor(props) {
         super(props);
@@ -23,7 +32,8 @@ class SidePanel extends React.Component {
             subGraphLoading: false,
             dropDownVisible: false,
             sortMethodchecked: "实体相似度",
-            sortLoading: false
+            sortLoading: false,
+            existPathIdx: {}
         };
     }
     componentDidMount() {
@@ -32,9 +42,9 @@ class SidePanel extends React.Component {
     componentDidUpdate(prevProps, prevState) {
         const { curTriple } = this.props;
         if (prevProps.curTriple !== curTriple) {
+            this.setState({ existPathIdx: {} })
             this.getPathStats(curTriple.relation)
         }
-
     }
     getPathStats(relation) {
         axios.get("/get_path_stats", {
@@ -46,9 +56,7 @@ class SidePanel extends React.Component {
                     const pathStatsList = data.data,
                         checkedPathList = []
                     pathStatsList.forEach(item => {
-                        if (item.weight > 2) {
-                            checkedPathList.push(item.path)
-                        }
+                        checkedPathList.push(item.path)
                     })
                     this.setState({ pathStatsList, checkedPathList })
                 }
@@ -90,7 +98,7 @@ class SidePanel extends React.Component {
             })
     }
     handleFactPrediction = () => {
-        const { checkedPathList } = this.state
+        const { checkedPathList, pathStatsList } = this.state
         const { curTriple, getKgRef } = this.props
         this.setState({ predictionLoading: true })
         axios.get("/get_prediction_result", {
@@ -99,13 +107,13 @@ class SidePanel extends React.Component {
             .then(({ data }) => {
                 if (data.state === 200) {
 
-                    const { existPathNodes, existPathLinks, existPathIdx, prediction_link, existNodes, existLinks } = data.data
+                    const { existPathNodes, existPathLinks, existPaths, prediction_link, existNodes, existLinks  } = data.data
                     if (existPathNodes !== null) {
-                        getKgRef.handleHightLightPath(existPathNodes, existPathLinks, prediction_link, existNodes, existLinks)
-                        const existPath = existPathIdx.map(idx => checkedPathList[idx])
-                        this.setState({ predictionLoading: false, checkedPathList: existPath })
+                        getKgRef.handleHightLightPath(true, prediction_link, existNodes, existLinks, colors, pathStatsList)
+                        const existPath = [...Object.keys(existPaths)]
+                        this.setState({ predictionLoading: false, checkedPathList: existPath, existPaths })
                     } else {
-                        getKgRef.handleHightLightPath([], [], prediction_link)
+                        getKgRef.handleHightLightPath(false, prediction_link)
                         message.error("无符合的推理路径！")
                         this.setState({ predictionLoading: false, checkedPathList: [] })
                     }
@@ -115,6 +123,7 @@ class SidePanel extends React.Component {
                 }
             })
             .catch(error => {
+                console.log(error);
                 message.error("查询推理路径失败！")
                 this.setState({ predictionLoading: false })
             })
@@ -227,7 +236,7 @@ class SidePanel extends React.Component {
         this.setState({ dropDownVisible: flag })
     }
     render() {
-        const { pathStatsList, checkedPathList, rankSimilarEntities, similarEntitiesLoading, checkAllFlag, indeterminate, predictionLoading, subGraphLoading, dropDownVisible, sortMethodchecked, sortLoading } = this.state
+        const { pathStatsList, checkedPathList, rankSimilarEntities, similarEntitiesLoading, checkAllFlag, indeterminate, predictionLoading, subGraphLoading, dropDownVisible, sortMethodchecked, sortLoading, existPathIdx } = this.state
         const menu = (
             <List
                 size="small"
@@ -268,15 +277,6 @@ class SidePanel extends React.Component {
             </List>
 
         );
-        const colors = [
-            "#d7c060", 
-            "#00FFFF",
-            'pink',
-            'cyan',
-            'magenta',
-            'gold',
-            'lime',
-        ]
         return (
             <div className="rl-view-sider">
                 <Divider orientation="left">推理路径</Divider>
@@ -289,6 +289,8 @@ class SidePanel extends React.Component {
                             <Button onClick={this.handleFactPrediction} loading={predictionLoading}>
                                 执行预测
                             </Button>
+                            <span>置信度</span>
+                            <span>命中条数</span>
                         </div>
                     }
                     bordered
@@ -303,9 +305,7 @@ class SidePanel extends React.Component {
                             {(item, index) => {
                                 return (
                                     <List.Item style={{ width: '100%', wordBreak: 'break-word' }}
-                                        extra={
-                                            <Badge count={item.weight} style={{ backgroundColor: colors[index] }}  />
-                                        }
+                                        actions={[<Badge count={item.weight} style={{ backgroundColor: colors[index] }} />, <Badge count={existPathIdx[item.path] ? existPathIdx[item.path] : 0.1} style={{ backgroundColor: colors[index] }} />]}
                                     >
                                         <Checkbox value={item.path}></Checkbox>
                                         <Popover
@@ -323,7 +323,7 @@ class SidePanel extends React.Component {
 
                         </VirtualList>
                     </Checkbox.Group>
-                </List>
+                </List >
                 {/* <Divider orientation="left">辅助信息</Divider>
                 <List
                     header={
@@ -377,7 +377,7 @@ class SidePanel extends React.Component {
 
                     </VirtualList>
                 </List> */}
-            </div>
+            </div >
         );
     }
 }

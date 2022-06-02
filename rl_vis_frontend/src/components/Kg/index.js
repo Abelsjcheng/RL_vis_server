@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import * as d3 from 'd3'
 import KgSettingPanel from '../KgSettingsPanel/index'
 import { forceManyBodyReuse } from 'd3-force-reuse'
-import { splitLinkName, splitNodeName } from '../../util/tool'
+import { splitLinkName, splitNodeName, findObjInArr } from '../../util/tool'
 import './index.scss'
 
 class Kg extends React.Component {
@@ -31,8 +31,10 @@ class Kg extends React.Component {
             links: this._kgData.links,
             forceSet: {
                 bodyStrength: -500, // 节点排斥力，负数为模拟电荷力
-                linkDistance: 100, // 边长度
+                linkDistance: 200, // 边长度
                 nodeSize: 8, // 节点大小
+                forceX: 0.01,
+                forceY: 0.03
             },
             svgStyle: {
                 linkWidth: 1,
@@ -49,7 +51,7 @@ class Kg extends React.Component {
             switchSet: {
                 showNodeText: false, // 显示隐藏节点标签
                 showLinkText: false, // 显示隐藏关系标签
-                autoZoomFlag: true, // 自适应缩放
+                autoZoomFlag: false, // 自适应缩放
                 nodeFocusFlag: true,
             },
             highLightNode: null, // 当前高亮节点
@@ -61,17 +63,17 @@ class Kg extends React.Component {
         if (this.props.onRef)
             this.props.onRef(this);
         this.initSvg()
+        this.initializeForces(this.simulation)
         this.initializeKg()
-        this.initializeForces()
-
     }
 
     componentDidUpdate(prevProps, prevState) {
         // state更新后,执行
-        const { forceSet, svgStyle, switchSet, links } = this.state
+        const { forceSet, svgStyle, switchSet, nodes, links } = this.state
         if (forceSet !== prevState.forceSet || links !== prevState.links) {
             // 重载force
-            this.updateForces()
+            this.updateForces(this.simulation, nodes, links, forceSet)
+            this.updateDragTick(this.simulation);
             this.updateKg()
 
             if (forceSet.nodeSize !== prevState.forceSet.nodeSize) {
@@ -96,15 +98,13 @@ class Kg extends React.Component {
             this.setState({
                 nodes: this._kgData.nodes,
                 links: this._kgData.links,
-                switchSet: Object.assign({}, switchSet, { autoZoomFlag: true }),
+                // switchSet: Object.assign({}, switchSet, { autoZoomFlag: true }),
             });
         }
-
-        // // 返回 null 表示无需更新 state。
-        // return null;
     }
     initSvg() {
-
+        const { nodes } = this.state
+        const { curTriple } = this.props
         this.svgWidth = this.kgNetwork.current.offsetWidth
         this.svgHeight = this.kgNetwork.current.offsetHeight
         // 加载缩放
@@ -122,63 +122,67 @@ class Kg extends React.Component {
             .append("g")
             .attr("class", "svg-kg-content");
 
+        nodes.forEach(d => {
+            if (findObjInArr(d.group, "name", curTriple.sourceEntity) !== null) {
+                d.x = this.svgWidth / 2
+                d.y = this.svgHeight - 100
+
+            } else if (findObjInArr(d.group, "name", curTriple.targetEntity) !== null) {
+                d.x = this.svgWidth / 2
+                d.y = 100
+            }
+        })
     }
 
-    initializeForces() {
+    initializeForces(simulation) {
         // 绑定力
-        this.simulation
+        const { nodes, links, forceSet } = this.state
+        this.buildForces(simulation, this.svgWidth, this.svgHeight)
+        // 更新力布局
+        this.updateForces(simulation, nodes, links, forceSet);
+        this.updateDragTick(simulation);
+    }
+    buildForces(simulation, width, height) {
+        simulation
             .force("link", d3.forceLink())
             .force("charge", forceManyBodyReuse())
-            .force("center", d3.forceCenter(this.svgWidth / 2, this.svgHeight / 2))
+            .force("center", d3.forceCenter(width / 2, height / 2))
             .force("collide", d3.forceCollide())
-            .force("forceX", d3.forceX(this.svgWidth / 2))
-            .force("forceY", d3.forceY(this.svgHeight / 2));
-
-        // 更新力布局
-        this.updateForces();
-
-
+            .force("forceX", d3.forceX(width / 2))
+            .force("forceY", d3.forceY(height / 2));
     }
-    updateForces = () => {
-        const { nodes, links, forceSet } = this.state
-        this.simulation.nodes(nodes)
+    updateForces = (simulation, nodes, links, forceSet) => {
+        simulation.nodes(nodes)
 
-        this.simulation.force("link")
+        simulation.force("link")
             .id(function (d) { return d.id; })
             .links(links)
             .distance(forceSet.linkDistance)
 
 
-        this.simulation.force("charge")
+        simulation.force("charge")
             .strength(forceSet.bodyStrength);
 
-        this.simulation.force("collide")
+        // 碰撞半径
+        let r_ratio = Math.max(...nodes.map(d => d.group ? d.group.length : 1)),
+            collide_radius = Math.ceil(r_ratio > 1 ? Math.sqrt(r_ratio) + 2 : r_ratio) * forceSet.nodeSize
+
+        simulation.force("collide")
             .strength(0.2)
-            .radius(forceSet.nodeSize)
+            .radius(collide_radius)
             .iterations(1);
 
-        this.simulation.force("forceX")
-            .strength(0.01);
+        simulation.force("forceX")
+            .strength(forceSet.forceX);
 
-        this.simulation.force("forceY")
-            .strength(0.03);
-
-
-        this.simulation.alpha(1).restart();
-        this.updateDragTick();
+        simulation.force("forceY")
+            .strength(forceSet.forceY);
+        simulation.alpha(1).restart();
     }
 
     initializeKg() {
-
         this.linkGroup = this.svg_kg.append("g")
             .attr("class", "link-group")
-
-        this.marker = this.linkGroup.selectAll("marker.marker")
-            .data(["noself", "self"], d => d)
-            .enter()
-            .append("marker")
-
-        this.markerPath = this.marker.append("path")
 
         let textGroup = this.svg_kg.append("g")
             .attr("class", "text-group")
@@ -214,13 +218,28 @@ class Kg extends React.Component {
             .style("stroke", svgStyle.linkStroke)
             .style("stroke-width", svgStyle.linkWidth)
             .style('fill', 'rgba(0, 0, 0, 0)')
-            .attr("marker-end", d => d.type === "self" ? "url(#self)" : "url(#noself)");
+            .attr("marker-end", d => {
+                return d.type === "self" ? "url(#self)" : `url(#groupNum_${d.target.group.length})`
+            });
+
+        // 非自循环，自循环，分组聚合
+        let markerData = ["noself", "self", ...new Set(nodes.map(d => {
+            return `groupNum_${d.group.length}`
+        }))]
+        this.marker = this.linkGroup.selectAll("marker.marker")
+            .data(markerData, d => d)
+
+        this.marker.exit().remove();
+
+        this.marker = this.marker.enter()
+            .append("marker")
+        this.markerPath = this.marker.append("path")
 
         this.marker
             .attr("id", d => d)
             .attr("markerUnits", "userSpaceOnUse")
             .attr("viewBox", `0 ${-forceSet.nodeSize * 0.3} ${forceSet.nodeSize * 0.6} ${forceSet.nodeSize * 0.6}`)
-            .attr("refX", d => d === "self" ? forceSet.nodeSize * 0.6 : forceSet.nodeSize * 1.6)
+            .attr("refX", forceSet.nodeSize * 0.6)
             .attr("refY", 0)
             .attr("markerWidth", forceSet.nodeSize * 0.6)
             .attr("markerHeight", forceSet.nodeSize * 0.6)
@@ -230,6 +249,17 @@ class Kg extends React.Component {
         this.markerPath
             .attr("d", `M0,${-forceSet.nodeSize * 0.3} L${forceSet.nodeSize * 0.6},0 L0,${forceSet.nodeSize * 0.3}`)
             .attr('fill', svgStyle.linkStroke)
+
+        nodes.forEach(d => {
+            if (findObjInArr(d.group, "name", curTriple.sourceEntity) !== null) {
+                d.fx = 100
+                d.fy = this.svgHeight / 2
+
+            } else if (findObjInArr(d.group, "name", curTriple.targetEntity) !== null) {
+                d.fx = this.svgWidth - 100
+                d.fy = this.svgHeight / 2
+            }
+        })
 
         let node = this.nodeGroup.selectAll("g").data(nodes, d => d.id);
 
@@ -243,48 +273,118 @@ class Kg extends React.Component {
 
         nodeEnter.append("circle")
             .attr("class", "node")
-            .attr("r", forceSet.nodeSize)
 
-        nodeEnter.append("text")
+        let _this = this
+
+        nodeEnter
+            .filter(d => d.group.length === 1)
+            .append("text")
             .attr("class", "node-text")
             .attr("dy", forceSet.nodeSize * 2)
-            .style("visibility", switchSet.showNodeText ? 'visible' : 'hidden')
+            .style("visibility", d => {
+                if (findObjInArr(d.group, "name", curTriple.sourceEntity) !== null) {
+                    return 'visible'
+                } else if (findObjInArr(d.group, "name", curTriple.targetEntity) !== null) {
+                    return 'visible'
+                } else {
+                    return switchSet.showNodeText ? 'visible' : 'hidden'
+                }
+            })
             .style('fill', "black")
             .attr("font-size", svgStyle.nodeLabelSize)
             .attr("dx", 0)
             .attr("text-anchor", "middle")
-            .text(d => splitNodeName(d.name))
+            .text(d => splitNodeName(d.group[0].name))
             .on('mouseover', function (e, d) {
                 d3.select(this)
-                    .text(d.name)
+                    .text(d.group[0].name)
             })
             .on('mouseout', function (e, d) {
                 d3.select(this)
-                    .text(splitNodeName(d.name))
+                    .text(splitNodeName(d.group[0].name))
             })
 
         this.updateNode = nodeEnter.merge(node)
 
         this.updateNode.select('.node')
+            .attr("r", d => d.group.length > 1 ? Math.ceil(Math.sqrt(d.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize)
             .style("fill", d => {
-                if (d.name === curTriple.sourceEntity) {
+                if (findObjInArr(d.group, "name", curTriple.sourceEntity) !== null) {
                     return svgStyle.sourceNodeColor
-                } else if (d.name === curTriple.targetEntity) {
+                } else if (findObjInArr(d.group, "name", curTriple.targetEntity) !== null) {
                     return svgStyle.targetNodeColor
+                } else if (d.group.length > 1) {
+                    return "#ece6e6"
                 } else {
                     return svgStyle.nodeColor
                 }
             })
             .style("stroke", d => {
-                if (d.name === curTriple.sourceEntity) {
+                if (findObjInArr(d.group, "name", curTriple.sourceEntity) !== null) {
                     return svgStyle.sourceNodeStroke
-                } else if (d.name === curTriple.targetEntity) {
+                } else if (findObjInArr(d.group, "name", curTriple.targetEntity) !== null) {
                     return svgStyle.targetNodeStroke
                 } else {
                     return svgStyle.nodeStroke
                 }
             })
             .style("stroke-width", 1)
+
+        // 添加聚合组节点
+        this.updateNode
+            .filter(d => d.group.length > 1)
+            .append('g')
+            .attr('id', d => `container${d.id}`)
+            .each(function (d) {
+                let simulation = d3.forceSimulation();
+                let width = Math.ceil(Math.sqrt(d.group.length) + 2) * forceSet.nodeSize * 2,
+                    height = width;
+                // 建立内置布局
+                _this.buildForces(simulation, width, height)
+
+                _this.updateForces(simulation, d.group, [], {
+                    bodyStrength: -130,
+                    linkDistance: 10,
+                    nodeSize: 8,
+                    forceX: 1,
+                    forceY: 1
+                });
+                let group = d3.select(this).selectAll("g").data(d.group, d => d.id);
+                let groupEnter = group.enter()
+                    .append('g')
+                    .attr("id", d => `node${d.id}`)
+                    .call(_this.drag(simulation))
+                    .on('mouseover', function (e, d) {
+                        d3.select(this)
+                            .select('.node-text')
+                            .style("visibility", 'visible')
+                    })
+                    .on('mouseout', function (e, d) {
+                        d3.select(this)
+                            .select('.node-text')
+                            .style("visibility", 'hidden')
+                    })
+
+                groupEnter.append("circle")
+                    .attr("class", "node")
+                    .attr("r", forceSet.nodeSize)
+                    .style("fill", svgStyle.nodeColor)
+                    .style("stroke", svgStyle.nodeStroke)
+                    .style("stroke-width", 1)
+
+                groupEnter
+                    .append("text")
+                    .attr("class", "node-text")
+                    .attr("dy", forceSet.nodeSize * 2)
+                    .style("visibility", 'hidden')
+                    .style('fill', "black")
+                    .attr("font-size", svgStyle.nodeLabelSize)
+                    .attr("dx", 0)
+                    .attr("text-anchor", "middle")
+                    .text(d => d.name)
+
+                _this.nodeGroupForceDragTick(simulation, groupEnter, forceSet.nodeSize, width, height);
+            })
 
         let linkText = this.linkTextGroup.selectAll("text.link-text").data(links, d => d.id);
 
@@ -298,13 +398,12 @@ class Kg extends React.Component {
             .attr("id", d => `linkText${d.id}`)
             .attr("font-size", svgStyle.linkLabelSize)
             .style("visibility", switchSet.showLinkText ? 'visible' : 'hidden')
-            .style('fill', "#CFCFCF")
+            .style('fill', "#9d9b9b")
             .attr("text-anchor", "middle")
             .text(d => splitLinkName(d.name))
 
         this.updateLinkText = linkTextEnter.merge(linkText)
             .attr("dy", d => d.linknum ? 3 + d.linknum * 20 : -3 + d.linknum * 20)
-
 
     }
     updateKgDisplay = () => {
@@ -315,7 +414,7 @@ class Kg extends React.Component {
 
         this.marker
             .attr("viewBox", `0 ${-forceSet.nodeSize * 0.3} ${forceSet.nodeSize * 0.6} ${forceSet.nodeSize * 0.6}`)
-            .attr("refX", d => d === "self" ? forceSet.nodeSize * 0.6 : forceSet.nodeSize * 1.6)
+            .attr("refX", d => forceSet.nodeSize * 0.6)
             .attr("markerWidth", forceSet.nodeSize * 0.6)
             .attr("markerHeight", forceSet.nodeSize * 0.6)
 
@@ -325,9 +424,10 @@ class Kg extends React.Component {
 
         this.updateNode
             .select('.node')
-            .attr("r", forceSet.nodeSize)
+            .attr("r", d => d.group.length > 1 ? Math.ceil(Math.sqrt(d.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize)
 
         this.updateNode
+            .filter(d => d.group.length === 1)
             .select('.node-text')
             .style("visibility", switchSet.showNodeText ? 'visible' : 'hidden')
             .attr("font-size", svgStyle.nodeLabelSize)
@@ -338,9 +438,24 @@ class Kg extends React.Component {
             .style("visibility", switchSet.showLinkText ? 'visible' : 'hidden')
 
     }
-    updateDragTick() {
+    updateDragTick(simulation) {
         const { forceSet } = this.state;
-        this.simulation.on('tick', () => {
+        const { curTriple } = this.props;
+        simulation.on('tick', () => {
+            // 节点显示位置
+            this.updateNode
+                .attr('transform', (d) => {
+
+                    if (findObjInArr(d.group, "name", curTriple.sourceEntity) !== null) {
+                        d.fx = 100
+                        d.fy = this.svgHeight / 2
+
+                    } else if (findObjInArr(d.group, "name", curTriple.targetEntity) !== null) {
+                        d.fx = this.svgWidth - 100
+                        d.fy = this.svgHeight / 2
+                    }
+                    return `translate(${d.x.toFixed(2)},${d.y.toFixed(2)})`
+                });
             this.updateLink
                 .attr('d', d => {
                     if (d.type === "self") {
@@ -354,32 +469,41 @@ class Kg extends React.Component {
                             y = d.source.y - Math.cos(2 * Math.PI / 360 * 60) * forceSet.nodeSize;
                         return `M${left_x.toFixed(2)},${y.toFixed(2)} C${(left_x - 20).toFixed(2)},${(y - forceSet.nodeSize * 5).toFixed(2)} ${(right_x + 20).toFixed(2)},${(y - forceSet.nodeSize * 5).toFixed(2)} ${right_x.toFixed(2)},${y.toFixed(2)}`
                     } else {
+                        let radian = Math.atan((d.target.y - d.source.y) / (d.target.x - d.source.x)),
+                            angle = Math.floor(180 / (Math.PI / radian));
+
+                        let target_r = d.target.group.length > 1 ? Math.ceil(Math.sqrt(d.target.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize,
+                            source_r = d.source.group.length > 1 ? Math.ceil(Math.sqrt(d.source.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize
+                        // 计算360度圆的对应度数
+                        let source_degree = d.target.x - d.source.x < 0 ? angle + 180 : angle,
+                            target_degree = d.target.x - d.source.x > 0 ? angle + 180 : angle
+                        // 计算目标节点上的坐标
+                        let source_x = d.source.x + Math.cos(Math.PI * 2 / 360 * source_degree) * source_r,
+                            source_y = d.source.y + Math.sin(Math.PI * 2 / 360 * source_degree) * source_r,
+                            target_x = d.target.x + Math.cos(Math.PI * 2 / 360 * target_degree) * target_r,
+                            target_y = d.target.y + Math.sin(Math.PI * 2 / 360 * target_degree) * target_r;
                         /*  4个象限取值:
                             cos为负sin+  ++
                             ++           cos为负sin+
                         */
-                        let bevelEdge = Math.sqrt(Math.pow(d.target.x - d.source.x, 2) + Math.pow(d.target.y - d.source.y, 2)),
-                            rotateAngleCos = (d.target.x - d.source.x) / bevelEdge,
-                            rotateAngleSin = (d.source.y - d.target.y) / bevelEdge;
+                        let bevelEdge = Math.sqrt(Math.pow(target_x - source_x, 2) + Math.pow(target_y - source_y, 2)),
+                            rotateAngleCos = (target_x - source_x) / bevelEdge,
+                            rotateAngleSin = (source_y - target_y) / bevelEdge;
 
-                        if (d.target.y < d.source.y && d.target.x > d.source.x) {
+                        if (target_y < source_y && target_x > source_x) {
                             rotateAngleCos = -rotateAngleCos
                             rotateAngleSin = -rotateAngleSin
-                        } else if (d.target.y < d.source.y && d.target.x < d.source.x) {
+                        } else if (target_y < source_y && target_x < source_x) {
                             rotateAngleCos = -rotateAngleCos
                             rotateAngleSin = -rotateAngleSin
                         }
-                        const leftBendDistance = ((d.source.x + d.target.x) / 2 + rotateAngleSin * d.linknum * 20).toFixed(2),
-                            rightBendDistance = ((d.source.y + d.target.y) / 2 + rotateAngleCos * d.linknum * 20).toFixed(2)
+                        const leftBendDistance = ((source_x + target_x) / 2 + rotateAngleSin * d.linknum * 20).toFixed(2),
+                            rightBendDistance = ((source_y + target_y) / 2 + rotateAngleCos * d.linknum * 20).toFixed(2)
 
-                        return `M${d.source.x.toFixed(2)},${d.source.y.toFixed(2)} Q${leftBendDistance},${rightBendDistance} ${d.target.x.toFixed(2)},${d.target.y.toFixed(2)}`
+                        return `M${source_x.toFixed(2)},${source_y.toFixed(2)} Q${leftBendDistance},${rightBendDistance} ${target_x.toFixed(2)},${target_y.toFixed(2)}`
                     }
                 })
-            // 节点显示位置
-            this.updateNode
-                .attr('transform', (d) => {
-                    return `translate(${d.x.toFixed(2)},${d.y.toFixed(2)})`
-                });
+
 
             this.updateLinkText
                 .attr('transform', (d) => {
@@ -388,19 +512,30 @@ class Kg extends React.Component {
                     } else {
                         let radian = Math.atan((d.target.y - d.source.y) / (d.target.x - d.source.x)),
                             angle = Math.floor(180 / (Math.PI / radian));
-                        return `translate(${((d.source.x + d.target.x) / 2).toFixed(2)},${((d.source.y + d.target.y) / 2 + d.linknum * 10).toFixed(2)}) rotate(${angle.toFixed(2)})`
+
+                        let target_r = d.target.group.length > 1 ? Math.ceil(Math.sqrt(d.target.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize,
+                            source_r = d.source.group.length > 1 ? Math.ceil(Math.sqrt(d.source.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize
+                        // 计算360度圆的对应度数
+                        let source_degree = d.target.x - d.source.x < 0 ? angle + 180 : angle,
+                            target_degree = d.target.x - d.source.x > 0 ? angle + 180 : angle
+                        // 计算目标节点上的坐标
+                        let source_x = d.source.x + Math.cos(Math.PI * 2 / 360 * source_degree) * source_r,
+                            source_y = d.source.y + Math.sin(Math.PI * 2 / 360 * source_degree) * source_r,
+                            target_x = d.target.x + Math.cos(Math.PI * 2 / 360 * target_degree) * target_r,
+                            target_y = d.target.y + Math.sin(Math.PI * 2 / 360 * target_degree) * target_r;
+                        return `translate(${((source_x + target_x) / 2).toFixed(2)},${((source_y + target_y) / 2 + d.linknum * 5).toFixed(2)}) rotate(${angle})`
 
                     }
                 });
 
-            if (this.simulation.alpha() < this.simulation.alphaMin()) {
+            if (simulation.alpha() < simulation.alphaMin()) {
                 // 拖拽时不缩放
                 if (this.state.switchSet.autoZoomFlag) {
                     this.autoZoom() // 自适应缩放
                 }
             }
         });
-        this.firstUpdate(this.simulation)
+        this.firstUpdate(simulation)
 
     }
     autoZoom() {
@@ -416,6 +551,29 @@ class Kg extends React.Component {
             const t = d3.zoomIdentity.translate(center_x, center_y).scale(next_scale);
             this.svg.transition().duration(750).call(this.zoom.transform, t)
         }
+    }
+    nodeGroupForceDragTick(simulation, nodes, nodeSize, width, height) {
+        simulation.on('tick', () => {
+            // 节点显示位置
+            nodes
+                .attr('transform', (d) => {
+                    let x = d.x - width / 2,
+                        y = d.y - height / 2;
+                    let dis = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
+                    if (dis > width / 2 - nodeSize) {
+                        let radian = Math.atan(y / x),
+                            degree = Math.floor(180 / (Math.PI / radian));
+                        if (x < 0) degree += 180 // 计算360度的圆上坐标
+                        let _x = Math.cos(Math.PI * 2 / 360 * degree) * (width / 2 - nodeSize),
+                            _y = Math.sin(Math.PI * 2 / 360 * degree) * (height / 2 - nodeSize);
+                        return `translate(${_x},${_y})`
+                    } else {
+                        return `translate(${x},${y})`
+                    }
+
+                });
+        });
+        this.firstUpdate(simulation)
     }
     //第一轮迭代，大概120次
     firstUpdate(simulation) {
@@ -495,62 +653,117 @@ class Kg extends React.Component {
             setTimeout(resolve, wait)
         })
     }
-    handleHightLightPath(snodes, slinks, prediction_link, existNodes, existLinks) {
-
+    handleHightLightPath(predictionFlag, prediction_link, existNodes, existLinks, colors, pathStatsList) {
+        const { entitys } = this.props
         this.clearSvg()
-        if (snodes.length > 0 && slinks.length > 0) {
-            let _links = [...this.props.kgData.links]
-            _links.push(prediction_link)
-            const colors = ["#d7c060", "#00FFFF"]
-
+        // 添加预测的头尾实体间的边
+        let _links = [...this.props.kgData.links],
+            _prediction_link = {
+                'id': `${entitys[prediction_link.es_name].type_id}-${prediction_link.rel_id}-${entitys[prediction_link.et_name].type_id}`,
+                'name': prediction_link.name,
+                'rel_id': prediction_link.rel_id,
+                'source': entitys[prediction_link.es_name].type_id,
+                'target': entitys[prediction_link.et_name].type_id,
+                'es_name': prediction_link.es_name,
+                'et_name': prediction_link.et_name,
+            }
+        _links.push(_prediction_link)
+        if (predictionFlag) {
             this.setState({ links: _links }, () => {
-                const { svgStyle, links, nodes } = this.state
-                this.nodeGroup.selectAll("g")
-                    .data(nodes)
-                    .select('.node')
-                    .style("opacity", d => {
-                        if(d.id === prediction_link.source.id || d.id === prediction_link.target.id){
-                            return "1"
-                        }else{
-                            return "0.3"
+                const { svgStyle } = this.state
+                this.updateNode
+                    .each(function (d) {
+                        let node_dom = d3.select(this)
+                        if (!(d.id === entitys[prediction_link.es_name].type_id || d.id === entitys[prediction_link.et_name].type_id)) {
+                            const find_path_index = (name) => {
+                                for (let key in existNodes) {
+                                    if (existNodes[key].includes(name)) {
+                                        return key
+                                    } else {
+                                        return null
+                                    }
+                                }
+                            }
+                            let path_idx = findObjInArr(pathStatsList, "path", find_path_index(d.group[0].name))
+                            if (path_idx !== null) {
+                                if (d.group.length === 1) {
+                                    // 高亮非聚合节点
+                                    node_dom.select('.node')
+                                        .style("fill", colors[path_idx])
+                                        .style("opacity", "1")
+                                    node_dom.select('.node-text')
+                                        .style("visibility", 'visible')
+
+                                } else {
+                                    // 高亮聚合节点
+                                    node_dom.select('.node')
+                                        .style("opacity", "1")
+                                    node_dom.select(`#container${d.id}`)
+                                        .selectAll('g')
+                                        .select('.node')
+                                        .style("fill", colors[path_idx])
+                                }
+                            } else {
+                                node_dom.select('.node')
+                                    .style("opacity", "0.3")
+                                node_dom.select('.node-text')
+                                    .style("visibility", 'hidden')
+                                if (d.group.length > 1) {
+                                    node_dom.select(`#container${d.id}`)
+                                        .selectAll('g')
+                                        .select('.node')
+                                        .style("opacity", "0.3")
+                                }
+                            }
                         }
-                    })
 
-                for (let key in existNodes) {
-                    existNodes[key].forEach(id => {
-                        this.svg.select(`#node${id}`)
-                            .select('.node')
-                            .style("fill", colors[key])
-                            .style("opacity", "1")
                     })
-                }
-                this.svg.selectAll(".link")
-                    .data(links)
-                    .filter(d => d.id !== prediction_link.id)
+                // 高亮路径
+                this.updateLink
+                    .filter(d => d.id !== _prediction_link.id)
                     .style("stroke-opacity", "0.2")
-
-                for (let key in existNodes) {
-                    existLinks[key].forEach(id => {
-                        this.svg.select(`#link${id}`)
-                            .style("stroke", colors[key])
+                this.updateLinkText
+                    .style("visibility", 'hidden')
+                // 路径置信度归一化
+                let maxWeight = Math.max(...pathStatsList.map(v => v.weight))
+                const normal = (weight) => {
+                    let a = 2 / (maxWeight - 1),
+                        b = 1 - a
+                    return a * weight + b
+                }
+                // 高亮路径边
+                for (let key in existLinks) {
+                    let path_idx = findObjInArr(pathStatsList, "path", key)
+                    existLinks[key].forEach(link => {
+                        link = JSON.parse(link)
+                        let link_id = `${entitys[link.es_name].type_id}-${link.rel_id}-${entitys[link.et_name].type_id}`
+                        this.linkGroup.select(`#link${link_id}`)
+                            .style("stroke", colors[path_idx])
                             .style("stroke-opacity", "1")
+                            .style("stroke-width", normal(pathStatsList[path_idx].weight).toFixed(1))
+                        this.linkTextGroup.select(`#linkText${link_id}`)
+                            .style("visibility", 'visible')
+
                     })
                 }
-                this.svg.select(`#link${prediction_link.id}`)
+                // 高亮预测边
+                this.linkGroup.select(`#link${_prediction_link.id}`)
                     .style("stroke", "green")
                     .style("stroke-width", svgStyle.linkWidth * 2)
                     .style("stroke-Dasharray", "4 2")
+                this.linkTextGroup.select(`#linkText${_prediction_link.id}`)
+                    .style("visibility", 'visible')
             })
 
         } else {
-            let _links = [...this.props.kgData.links]
-            _links.push(prediction_link)
             this.setState({ links: _links }, () => {
                 const { svgStyle } = this.state
-                this.svg.select(`#link${prediction_link.id}`)
+                this.linkGroup.select(`#link${_prediction_link.id}`)
                     .style("stroke", "black")
                     .style("stroke-width", svgStyle.linkWidth * 2)
                     .style("stroke-Dasharray", "4 2")
+                this.linkTextGroup.select(`#linkText${_prediction_link.id}`)
+                    .style("visibility", 'visible')
             })
         }
 
@@ -609,9 +822,9 @@ function setDoubleLink(links) {
     });
     // 遍历给每组去调用 setLinkNumbers 来分配 linkum
     links.forEach((link) => {
-        const key = setLinkName(link);
-        const group = linkGroup[key];
-        const keyPair = key.split(':');
+        const key = setLinkName(link),
+            group = linkGroup[key],
+            keyPair = key.split(':');
         // 设置自循环标签
         let type = 'noself';
         if (keyPair[0] === keyPair[1]) {
@@ -674,4 +887,5 @@ function setLinkName(link) {
             ? `${link.source}:${link.target}`
             : `${link.target}:${link.source}`
 }
+
 export default Kg;
