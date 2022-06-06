@@ -26,6 +26,7 @@ class Kg extends React.Component {
         this.svgWidth = null;
         this.svgHeight = null;
         this.kgNetwork = React.createRef();
+        this.treeLevelData = []
         this.state = {
             nodes: this._kgData.nodes,
             links: this._kgData.links,
@@ -44,8 +45,8 @@ class Kg extends React.Component {
                 nodeStroke: '#ACACAC',
                 sourceNodeColor: "#F16667",
                 sourceNodeStroke: "#EB2728",
-                targetNodeColor: "#4C8EDA",
-                targetNodeStroke: "#2870C2",
+                targetNodeColor: "#5eda4c", //  #4C8EDA
+                targetNodeStroke: "#24a51f", //  #2870C2
                 nodeLabelSize: 10
             },
             switchSet: {
@@ -63,8 +64,9 @@ class Kg extends React.Component {
         if (this.props.onRef)
             this.props.onRef(this);
         this.initSvg()
-        this.initializeForces(this.simulation)
+        this.buildForceAndTreeLayout()
         this.initializeKg()
+        this.updateLayout()
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -72,9 +74,10 @@ class Kg extends React.Component {
         const { forceSet, svgStyle, switchSet, nodes, links } = this.state
         if (forceSet !== prevState.forceSet || links !== prevState.links) {
             // 重载force
-            this.updateForces(this.simulation, nodes, links, forceSet)
-            this.updateDragTick(this.simulation);
+
+            this.buildForceAndTreeLayout()
             this.updateKg()
+            this.updateLayout()
 
             if (forceSet.nodeSize !== prevState.forceSet.nodeSize) {
                 this.updateKgDisplay()
@@ -121,26 +124,49 @@ class Kg extends React.Component {
         this.svg_kg = this.svg
             .append("g")
             .attr("class", "svg-kg-content");
+    }
+    buildForceAndTreeLayout() {
+        const { curTriple } = this.props
+        const { forceSet, nodes, links } = this.state
 
+        let nodeSpace = 40,
+            padding = 200,
+            linkLength = (this.svgWidth - padding * 2) / 3,
+            levels = []
+        this.treeLevelData = []
+        let _nodes = {}
         nodes.forEach(d => {
-            if (findObjInArr(d.group, "name", curTriple.sourceEntity) !== null) {
-                d.x = this.svgWidth / 2
-                d.y = this.svgHeight - 100
+            let r = d.group.length > 1 ? Math.ceil(Math.sqrt(d.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize
+            d.x = padding + linkLength * d.pos_inPath
+            if (levels.length <= d.pos_inPath) {
+                levels.push([r + nodeSpace])
+                this.treeLevelData.push([d])
+            } else {
+                levels[d.pos_inPath].push(levels[d.pos_inPath].at(-1) + r + nodeSpace)
+                this.treeLevelData[d.pos_inPath].push([d])
+            }
 
+            if (findObjInArr(d.group, "name", curTriple.sourceEntity) !== null) {
+                d.y = this.svgHeight - 50
             } else if (findObjInArr(d.group, "name", curTriple.targetEntity) !== null) {
-                d.x = this.svgWidth / 2
-                d.y = 100
+                d.y = this.svgHeight - 50
+            } else {
+                d.y = this.svgHeight - 50 - levels[d.pos_inPath].at(-1)
+            }
+            levels[d.pos_inPath][levels[d.pos_inPath].length - 1] += r
+            _nodes[d.id] = d
+        })
+        links.forEach(link => {
+            if (!(link.source instanceof Object)) {
+                link.source = _nodes[link.source]
+                link.target = _nodes[link.target]
             }
         })
     }
-
-    initializeForces(simulation) {
-        // 绑定力
-        const { nodes, links, forceSet } = this.state
-        this.buildForces(simulation, this.svgWidth, this.svgHeight)
-        // 更新力布局
-        this.updateForces(simulation, nodes, links, forceSet);
-        this.updateDragTick(simulation);
+    treeLevelSort() {
+        this.treeLevelData.forEach(d => {
+            
+        })
     }
     buildForces(simulation, width, height) {
         simulation
@@ -268,7 +294,7 @@ class Kg extends React.Component {
         let nodeEnter = node.enter()
             .append('g')
             .attr("id", d => `node${d.id}`)
-            .call(this.drag(this.simulation))
+            .call(this.dragInTreeLayout())
 
 
         nodeEnter.append("circle")
@@ -329,6 +355,9 @@ class Kg extends React.Component {
                 }
             })
             .style("stroke-width", 1)
+            .on("click", function (e, d) {
+                console.log(d);
+            })
 
         // 添加聚合组节点
         this.updateNode
@@ -386,6 +415,7 @@ class Kg extends React.Component {
                 _this.nodeGroupForceDragTick(simulation, groupEnter, forceSet.nodeSize, width, height);
             })
 
+
         let linkText = this.linkTextGroup.selectAll("text.link-text").data(links, d => d.id);
 
         linkText.exit().remove();
@@ -403,7 +433,7 @@ class Kg extends React.Component {
             .text(d => splitLinkName(d.name))
 
         this.updateLinkText = linkTextEnter.merge(linkText)
-            .attr("dy", d => d.linknum ? 3 + d.linknum * 20 : -3 + d.linknum * 20)
+            .attr("dy", -3 - svgStyle.linkWidth)
 
     }
     updateKgDisplay = () => {
@@ -438,105 +468,87 @@ class Kg extends React.Component {
             .style("visibility", switchSet.showLinkText ? 'visible' : 'hidden')
 
     }
-    updateDragTick(simulation) {
+    updateLayout() {
         const { forceSet } = this.state;
-        const { curTriple } = this.props;
-        simulation.on('tick', () => {
-            // 节点显示位置
-            this.updateNode
-                .attr('transform', (d) => {
+        // 节点显示位置
+        this.updateNode
+            .attr('transform', (d) => {
+                return `translate(${d.x.toFixed(2)},${d.y.toFixed(2)})`
+            });
+        this.updateLink
+            .attr('d', d => {
+                if (d.type === "self") {
+                    /*
+                        left_x 圆左上角的点x轴值
+                        right_x 圆右上角的点x轴值
+                        y  圆左上角的y轴值
+                    */
+                    const left_x = d.source.x - Math.sin(2 * Math.PI / 360 * 60) * forceSet.nodeSize,
+                        right_x = d.source.x + Math.sin(2 * Math.PI / 360 * 60) * forceSet.nodeSize,
+                        y = d.source.y - Math.cos(2 * Math.PI / 360 * 60) * forceSet.nodeSize;
+                    return `M${left_x.toFixed(2)},${y.toFixed(2)} C${(left_x - 20).toFixed(2)},${(y - forceSet.nodeSize * 5).toFixed(2)} ${(right_x + 20).toFixed(2)},${(y - forceSet.nodeSize * 5).toFixed(2)} ${right_x.toFixed(2)},${y.toFixed(2)}`
+                } else {
+                    let radian = Math.atan((d.target.y - d.source.y) / (d.target.x - d.source.x)),
+                        angle = Math.floor(180 / (Math.PI / radian));
 
-                    if (findObjInArr(d.group, "name", curTriple.sourceEntity) !== null) {
-                        d.fx = 100
-                        d.fy = this.svgHeight / 2
+                    let target_r = d.target.group.length > 1 ? Math.ceil(Math.sqrt(d.target.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize,
+                        source_r = d.source.group.length > 1 ? Math.ceil(Math.sqrt(d.source.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize
+                    // 计算360度圆的对应度数
+                    let source_degree = d.target.x - d.source.x < 0 ? angle + 180 : angle,
+                        target_degree = d.target.x - d.source.x > 0 ? angle + 180 : angle
+                    // 计算目标节点上的坐标
+                    let source_x = d.source.x + Math.cos(Math.PI * 2 / 360 * source_degree) * source_r,
+                        source_y = d.source.y + Math.sin(Math.PI * 2 / 360 * source_degree) * source_r,
+                        target_x = d.target.x + Math.cos(Math.PI * 2 / 360 * target_degree) * target_r,
+                        target_y = d.target.y + Math.sin(Math.PI * 2 / 360 * target_degree) * target_r;
+                    /*  4个象限取值:
+                        cos为负sin+  ++
+                        ++           cos为负sin+
+                    */
+                    let bevelEdge = Math.sqrt(Math.pow(target_x - source_x, 2) + Math.pow(target_y - source_y, 2)),
+                        rotateAngleCos = (target_x - source_x) / bevelEdge,
+                        rotateAngleSin = (source_y - target_y) / bevelEdge;
 
-                    } else if (findObjInArr(d.group, "name", curTriple.targetEntity) !== null) {
-                        d.fx = this.svgWidth - 100
-                        d.fy = this.svgHeight / 2
+                    if (target_y < source_y && target_x > source_x) {
+                        rotateAngleCos = -rotateAngleCos
+                        rotateAngleSin = -rotateAngleSin
+                    } else if (target_y < source_y && target_x < source_x) {
+                        rotateAngleCos = -rotateAngleCos
+                        rotateAngleSin = -rotateAngleSin
                     }
-                    return `translate(${d.x.toFixed(2)},${d.y.toFixed(2)})`
-                });
-            this.updateLink
-                .attr('d', d => {
-                    if (d.type === "self") {
-                        /*
-                            left_x 圆左上角的点x轴值
-                            right_x 圆右上角的点x轴值
-                            y  圆左上角的y轴值
-                        */
-                        const left_x = d.source.x - Math.sin(2 * Math.PI / 360 * 60) * forceSet.nodeSize,
-                            right_x = d.source.x + Math.sin(2 * Math.PI / 360 * 60) * forceSet.nodeSize,
-                            y = d.source.y - Math.cos(2 * Math.PI / 360 * 60) * forceSet.nodeSize;
-                        return `M${left_x.toFixed(2)},${y.toFixed(2)} C${(left_x - 20).toFixed(2)},${(y - forceSet.nodeSize * 5).toFixed(2)} ${(right_x + 20).toFixed(2)},${(y - forceSet.nodeSize * 5).toFixed(2)} ${right_x.toFixed(2)},${y.toFixed(2)}`
-                    } else {
-                        let radian = Math.atan((d.target.y - d.source.y) / (d.target.x - d.source.x)),
-                            angle = Math.floor(180 / (Math.PI / radian));
+                    const leftBendDistance = ((source_x + target_x) / 2 + rotateAngleSin * d.linknum * 20).toFixed(2),
+                        rightBendDistance = ((source_y + target_y) / 2 + rotateAngleCos * d.linknum * 20).toFixed(2)
 
-                        let target_r = d.target.group.length > 1 ? Math.ceil(Math.sqrt(d.target.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize,
-                            source_r = d.source.group.length > 1 ? Math.ceil(Math.sqrt(d.source.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize
-                        // 计算360度圆的对应度数
-                        let source_degree = d.target.x - d.source.x < 0 ? angle + 180 : angle,
-                            target_degree = d.target.x - d.source.x > 0 ? angle + 180 : angle
-                        // 计算目标节点上的坐标
-                        let source_x = d.source.x + Math.cos(Math.PI * 2 / 360 * source_degree) * source_r,
-                            source_y = d.source.y + Math.sin(Math.PI * 2 / 360 * source_degree) * source_r,
-                            target_x = d.target.x + Math.cos(Math.PI * 2 / 360 * target_degree) * target_r,
-                            target_y = d.target.y + Math.sin(Math.PI * 2 / 360 * target_degree) * target_r;
-                        /*  4个象限取值:
-                            cos为负sin+  ++
-                            ++           cos为负sin+
-                        */
-                        let bevelEdge = Math.sqrt(Math.pow(target_x - source_x, 2) + Math.pow(target_y - source_y, 2)),
-                            rotateAngleCos = (target_x - source_x) / bevelEdge,
-                            rotateAngleSin = (source_y - target_y) / bevelEdge;
-
-                        if (target_y < source_y && target_x > source_x) {
-                            rotateAngleCos = -rotateAngleCos
-                            rotateAngleSin = -rotateAngleSin
-                        } else if (target_y < source_y && target_x < source_x) {
-                            rotateAngleCos = -rotateAngleCos
-                            rotateAngleSin = -rotateAngleSin
-                        }
-                        const leftBendDistance = ((source_x + target_x) / 2 + rotateAngleSin * d.linknum * 20).toFixed(2),
-                            rightBendDistance = ((source_y + target_y) / 2 + rotateAngleCos * d.linknum * 20).toFixed(2)
-
-                        return `M${source_x.toFixed(2)},${source_y.toFixed(2)} Q${leftBendDistance},${rightBendDistance} ${target_x.toFixed(2)},${target_y.toFixed(2)}`
-                    }
-                })
-
-
-            this.updateLinkText
-                .attr('transform', (d) => {
-                    if (d.type === "self") {
-                        return `translate(${((d.source.x + d.target.x) / 2).toFixed(2)},${((d.source.y + d.target.y) / 2 - forceSet.nodeSize * 5).toFixed(2)})`
-                    } else {
-                        let radian = Math.atan((d.target.y - d.source.y) / (d.target.x - d.source.x)),
-                            angle = Math.floor(180 / (Math.PI / radian));
-
-                        let target_r = d.target.group.length > 1 ? Math.ceil(Math.sqrt(d.target.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize,
-                            source_r = d.source.group.length > 1 ? Math.ceil(Math.sqrt(d.source.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize
-                        // 计算360度圆的对应度数
-                        let source_degree = d.target.x - d.source.x < 0 ? angle + 180 : angle,
-                            target_degree = d.target.x - d.source.x > 0 ? angle + 180 : angle
-                        // 计算目标节点上的坐标
-                        let source_x = d.source.x + Math.cos(Math.PI * 2 / 360 * source_degree) * source_r,
-                            source_y = d.source.y + Math.sin(Math.PI * 2 / 360 * source_degree) * source_r,
-                            target_x = d.target.x + Math.cos(Math.PI * 2 / 360 * target_degree) * target_r,
-                            target_y = d.target.y + Math.sin(Math.PI * 2 / 360 * target_degree) * target_r;
-                        return `translate(${((source_x + target_x) / 2).toFixed(2)},${((source_y + target_y) / 2 + d.linknum * 5).toFixed(2)}) rotate(${angle})`
-
-                    }
-                });
-
-            if (simulation.alpha() < simulation.alphaMin()) {
-                // 拖拽时不缩放
-                if (this.state.switchSet.autoZoomFlag) {
-                    this.autoZoom() // 自适应缩放
+                    return `M${source_x.toFixed(2)},${source_y.toFixed(2)} Q${leftBendDistance},${rightBendDistance} ${target_x.toFixed(2)},${target_y.toFixed(2)}`
                 }
-            }
-        });
-        this.firstUpdate(simulation)
+            })
 
+
+        this.updateLinkText
+            .attr('transform', (d) => {
+                if (d.type === "self") {
+                    return `translate(${((d.source.x + d.target.x) / 2).toFixed(2)},${((d.source.y + d.target.y) / 2 - forceSet.nodeSize * 5).toFixed(2)})`
+                } else {
+                    let radian = Math.atan((d.target.y - d.source.y) / (d.target.x - d.source.x)),
+                        angle = Math.floor(180 / (Math.PI / radian));
+
+                    let target_r = d.target.group.length > 1 ? Math.ceil(Math.sqrt(d.target.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize,
+                        source_r = d.source.group.length > 1 ? Math.ceil(Math.sqrt(d.source.group.length) + 2) * forceSet.nodeSize : forceSet.nodeSize
+                    // 计算360度圆的对应度数
+                    let source_degree = d.target.x - d.source.x < 0 ? angle + 180 : angle,
+                        target_degree = d.target.x - d.source.x > 0 ? angle + 180 : angle
+                    // 计算目标节点上的坐标
+                    let source_x = d.source.x + Math.cos(Math.PI * 2 / 360 * source_degree) * source_r,
+                        source_y = d.source.y + Math.sin(Math.PI * 2 / 360 * source_degree) * source_r,
+                        target_x = d.target.x + Math.cos(Math.PI * 2 / 360 * target_degree) * target_r,
+                        target_y = d.target.y + Math.sin(Math.PI * 2 / 360 * target_degree) * target_r;
+                    if (d.id === "15492-62111_0-233-15492-62111_8")
+                        console.log(angle);
+                    return angle < 0 ? `translate(${((source_x + target_x) / 2).toFixed(2)},${((source_y + target_y) / 2 - d.linknum * 10).toFixed(2)}) rotate(${angle})`
+                        : `translate(${((source_x + target_x) / 2).toFixed(2)},${((source_y + target_y) / 2 + d.linknum * 10).toFixed(2)}) rotate(${angle})`
+
+                }
+            });
     }
     autoZoom() {
         const viewBox = this.svg.node().getBBox(),
@@ -588,6 +600,31 @@ class Kg extends React.Component {
             scale(${event.transform.k.toFixed(4)})`
         );
     }
+    dragInTreeLayout() {
+        let _this = this
+        function dragstarted(event, d) {
+            _this.setState({ switchSet: Object.assign({}, _this.state.switchSet, { autoZoomFlag: false }) })
+            d.fx = d.x; // fx固定节点
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.x = event.x;
+            d.y = event.y;
+            _this.updateLayout()
+        }
+
+        function dragended(event, d) {
+            d.fx = null; // fx固定节点
+            d.fy = null;
+        }
+
+        return d3
+            .drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended);
+    }
     // 拖拽
     drag(simulation) {
         let _this = this
@@ -606,8 +643,8 @@ class Kg extends React.Component {
 
         function dragended(event, d) {
             if (!event.active) simulation.alphaTarget(0);
-            d.fx = d.x; // fx固定节点
-            d.fy = d.y;
+            d.fx = null; // fx固定节点
+            d.fy = null;
         }
 
         return d3
@@ -653,8 +690,9 @@ class Kg extends React.Component {
             setTimeout(resolve, wait)
         })
     }
-    handleHightLightPath(predictionFlag, prediction_link, existNodes, existLinks, colors, pathStatsList) {
+    handleHightLightPath(predictionFlag, prediction_link, existNodes, existLinks, pathStatsList) {
         const { entitys } = this.props
+        const { forceSet } = this.state
         this.clearSvg()
         // 添加预测的头尾实体间的边
         let _links = [...this.props.kgData.links],
@@ -675,22 +713,44 @@ class Kg extends React.Component {
                     .each(function (d) {
                         let node_dom = d3.select(this)
                         if (!(d.id === entitys[prediction_link.es_name].type_id || d.id === entitys[prediction_link.et_name].type_id)) {
+
                             const find_path_index = (name) => {
+                                let paths = []
                                 for (let key in existNodes) {
                                     if (existNodes[key].includes(name)) {
-                                        return key
-                                    } else {
-                                        return null
+                                        paths.push(findObjInArr(pathStatsList, "path", key))
                                     }
                                 }
+                                return paths
                             }
-                            let path_idx = findObjInArr(pathStatsList, "path", find_path_index(d.group[0].name))
-                            if (path_idx !== null) {
+                            let paths = find_path_index(d.group[0].name)
+                            if (paths.length > 0) {
+                                const pie = d3.pie()
+                                    .value((d) => d.weight)
+                                    (paths)
+
+                                const arc = d3.arc()
+                                    .innerRadius(0)
+                                    .outerRadius(forceSet.nodeSize)
                                 if (d.group.length === 1) {
                                     // 高亮非聚合节点
-                                    node_dom.select('.node')
-                                        .style("fill", colors[path_idx])
-                                        .style("opacity", "1")
+                                    const part = node_dom.append('g')
+                                        .selectAll('.part')
+                                        .data(pie)
+                                        .enter()
+                                        .append('g')
+                                    part.append('path')
+                                        .attr('d', arc)
+                                        .attr('fill', (d, i) => d.data.color)
+                                    part.append("text")
+                                        .attr('transform', (d) => 'translate(' + arc.centroid(d) + ')')
+                                        .attr("dx", "-.45em")
+                                        .attr('fill', 'white')
+                                        .attr("font-size", forceSet.nodeSize / 3)
+                                        .text((d) => d.data.weight)
+                                    // node_dom.select('.node')
+                                    //     .style("fill", paths[0].color)
+                                    //     .style("opacity", "1")
                                     node_dom.select('.node-text')
                                         .style("visibility", 'visible')
 
@@ -698,10 +758,27 @@ class Kg extends React.Component {
                                     // 高亮聚合节点
                                     node_dom.select('.node')
                                         .style("opacity", "1")
-                                    node_dom.select(`#container${d.id}`)
+                                    const part = node_dom.select(`#container${d.id}`)
                                         .selectAll('g')
-                                        .select('.node')
-                                        .style("fill", colors[path_idx])
+                                        .append('g')
+                                        .selectAll('.part')
+                                        .data(pie)
+                                        .enter()
+                                        .append('g')
+                                    part.append('path')
+                                        .attr('d', arc)
+                                        .attr('fill', (d, i) => d.data.color)
+                                    part.append("text")
+                                        .attr('transform', (d) => 'translate(' + arc.centroid(d) + ')')
+                                        .attr("dx", "-.45em")
+                                        .attr('fill', 'white')
+                                        .attr("font-size", forceSet.nodeSize / 3)
+                                        .text((d) => d.data.weight)
+
+                                    // node_dom.select(`#container${d.id}`)
+                                    //     .selectAll('g')
+                                    //     .select('.node')
+                                    //     .style("fill", paths[0].color)
                                 }
                             } else {
                                 node_dom.select('.node')
@@ -732,19 +809,47 @@ class Kg extends React.Component {
                     return a * weight + b
                 }
                 // 高亮路径边
+                let highLight_links = {}
                 for (let key in existLinks) {
-                    let path_idx = findObjInArr(pathStatsList, "path", key)
+                    let path = findObjInArr(pathStatsList, "path", key)
                     existLinks[key].forEach(link => {
                         link = JSON.parse(link)
                         let link_id = `${entitys[link.es_name].type_id}-${link.rel_id}-${entitys[link.et_name].type_id}`
-                        this.linkGroup.select(`#link${link_id}`)
-                            .style("stroke", colors[path_idx])
-                            .style("stroke-opacity", "1")
-                            .style("stroke-width", normal(pathStatsList[path_idx].weight).toFixed(1))
-                        this.linkTextGroup.select(`#linkText${link_id}`)
-                            .style("visibility", 'visible')
-
+                        if (!highLight_links[link_id]) {
+                            highLight_links[link_id] = [path]
+                        } else {
+                            highLight_links[link_id].push(path)
+                        }
+                        // this.linkGroup.select(`#link${link_id}`)
+                        //     .style("stroke", "url(#myGradient)")
+                        //     .style("stroke-opacity", "1")
+                        //     .style("stroke-width", normal(path.weight).toFixed(1))
+                        // this.linkTextGroup.select(`#linkText${link_id}`)
+                        //     .style("visibility", 'visible')
                     })
+                }
+                for (let [key, value] of Object.entries(highLight_links)) {
+                    // 创建样式
+                    let linearGradient = this.linkGroup.append("defs")
+                        .append("linearGradient")
+                        .attr("id", d => { return `myGradient${key}` })
+                        .attr("class", "myGradient");
+                    let sum_weight,
+                        Proportion = 0
+
+                    sum_weight = value.reduce((sum_weight, obj) => (sum_weight += obj.weight), 0)
+                    value.forEach((path, index) => {
+                        linearGradient.append("stop")
+                            .attr("offset", `${Proportion * 100}%`)
+                            .style("stop-color", path.color);
+                        Proportion += path.weight / sum_weight
+                    })
+                    this.linkGroup.select(`#link${key}`)
+                        .style("stroke", `url(#myGradient${key})`)
+                        .style("stroke-opacity", "1")
+                        .style("stroke-width", normal(value[0].weight).toFixed(1))
+                    this.linkTextGroup.select(`#linkText${key}`)
+                        .style("visibility", 'visible')
                 }
                 // 高亮预测边
                 this.linkGroup.select(`#link${_prediction_link.id}`)
