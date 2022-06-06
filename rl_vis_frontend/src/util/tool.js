@@ -13,7 +13,7 @@ export function splitNodeName(name) {
 export function findObjInArr(arr, key, val) {
     for (let i = 0; i < arr.length; i++) {
         if (arr[i][key] === val) {
-            return i
+            return arr[i]
         }
     }
     return null
@@ -52,7 +52,7 @@ function buildKg(graph, triple) {
             entitys[link.es_name] = {
                 "id": link.source,
                 "name": link.es_name,
-                "path_pos": link.path_order - 1,
+                "pos_inPath": link.path_order - 1,
                 "out": [{
                     "rel_id": link.rel_id,
                     "name": link.name,
@@ -73,7 +73,7 @@ function buildKg(graph, triple) {
             entitys[link.et_name] = {
                 "id": link.target,
                 "name": link.et_name,
-                "path_pos": link.path_order,
+                "pos_inPath": link.path_order,
                 "out": [],
                 "enter": [{
                     "rel_id": link.rel_id,
@@ -95,7 +95,7 @@ function buildKg(graph, triple) {
         } else {
             let type_id = `${entitys[triple.sourceEntity].id}-${entitys[triple.targetEntity].id}_${count++}`
             value.type_id = type_id
-            map.set(nodeType, { "id": type_id, "group": [value], "path_pos": value.path_pos })
+            map.set(nodeType, { "id": type_id, "group": [value], "pos_inPath": value.pos_inPath })
         }
     }
     for (let value of Object.values(entitys)) {
