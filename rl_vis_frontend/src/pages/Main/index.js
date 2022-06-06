@@ -1,11 +1,13 @@
 
 import React from 'react';
-import { Spin, message, Layout, Row, Col } from 'antd';
+import { Spin, message, Layout, Row, Col, Drawer, Button, Space, Collapse, Table, Tag, Input, Radio, Divider  } from 'antd';
 import Kg from '../../components/Kg'
 import SidePanel from '../Side/index'
 import HeaderPanel from '../Header/index'
+import PathDetailsTabel from '../../components/PathDetails/tabel/index'
 import './index.scss'
 const { Header, Content, Sider } = Layout;
+const { Panel } = Collapse;
 
 class IndexPage extends React.Component {
     constructor(props) {
@@ -17,7 +19,9 @@ class IndexPage extends React.Component {
             curTriple: null,
             kgRef: null,
             extraSubGraphs: [],
-            extrakgRefs: {}
+            extrakgRefs: {},
+            drawerVisible: false,
+            pathDetails: []
         };
     }
     componentDidMount() {
@@ -29,8 +33,12 @@ class IndexPage extends React.Component {
     handelMainStateChange = (nextstates) => {
         this.setState(nextstates)
     }
+    onDrawerClose = () => {
+        this.setState({ drawerVisible: false })
+    }
     render() {
-        const { kgData, curTriple, isLoaded, kgRef, entitys, extraSubGraphs, extrakgRefs } = this.state
+        const { kgData, curTriple, isLoaded, kgRef, entitys, extraSubGraphs, extrakgRefs, drawerVisible, pathDetails } = this.state
+
         return (
             <div className="App">
                 <Layout hasSider>
@@ -51,7 +59,10 @@ class IndexPage extends React.Component {
                             style={{
                                 padding: 24,
                                 margin: 0,
-                                overflow: 'initial'
+                                overflow: 'initial',
+                                width: '100%',
+                                position: 'relative',
+                                overflow: 'hidden'
                             }}
                         >
                             <div
@@ -77,6 +88,45 @@ class IndexPage extends React.Component {
                                 </Row> */}
 
                             </div>
+                            <Drawer
+                                title="预测结果详情"
+                                placement="bottom"
+                                width={500}
+                                onClose={this.onDrawerClose}
+                                visible={drawerVisible}
+                                getContainer={false}
+                                mask={false}
+                                style={{ position: 'absolute' }}
+                                extra={
+                                    <Space>
+                                        <span>当前预测概率: 90%</span>
+                                        <Divider type="vertical" />
+                                        <label>是否补全当前关系: </label>
+                                        <Radio.Group>
+                                            <Radio value={true}>Yes</Radio>
+                                            <Radio value={false}>No</Radio>
+                                        </Radio.Group>
+                                    </Space>
+                                }
+                            >
+                                <Collapse accordion>
+                                    {
+                                        pathDetails.map((item, index) => {
+                                            return (
+                                                <Panel
+                                                    header={"path_rule" + (index + 1) + ': ' + item.path}
+                                                    key={index}
+                                                    extra={<>
+                                                        <label>打分: </label>
+                                                        <Input style={{ width: 30 }} size={"small"} maxLength={25} />
+                                                    </>}>
+                                                    <PathDetailsTabel key={index} pathData={item}></PathDetailsTabel>
+                                                </Panel>
+                                            )
+                                        })
+                                    }
+                                </Collapse>
+                            </Drawer>
                         </Content>
                     </Layout>
 
