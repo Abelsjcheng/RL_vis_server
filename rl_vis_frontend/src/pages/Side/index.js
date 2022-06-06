@@ -1,5 +1,6 @@
 
 import React, { forwardRef } from 'react';
+import * as d3 from 'd3'
 import axios from '../../assets/http'
 import { splitLinkName, splitNodeName } from '../../util/tool'
 import { Button, Row, Col, message, List, Divider, Checkbox, Badge, Popover, Dropdown, Menu, Radio } from 'antd';
@@ -9,14 +10,7 @@ import { DownOutlined } from '@ant-design/icons';
 import PathVis from '../../components/Sider/PathVis'
 import './index.scss'
 
-const colors = [
-    "#d7c060",
-    "#00FFFF",
-    'pink',
-    'magenta',
-    'gold',
-    'lime',
-]
+
 class SidePanel extends React.Component {
     constructor(props) {
         super(props);
@@ -33,20 +27,23 @@ class SidePanel extends React.Component {
             dropDownVisible: false,
             sortMethodchecked: "实体相似度",
             sortLoading: false,
-            existPathIdx: {}
+            existPaths: {},
+            pathDetails: []
         };
     }
     componentDidMount() {
+
         // this.getPathStats()
     }
     componentDidUpdate(prevProps, prevState) {
         const { curTriple } = this.props;
         if (prevProps.curTriple !== curTriple) {
-            this.setState({ existPathIdx: {} })
+            this.setState({ existPaths: {} })
             this.getPathStats(curTriple.relation)
         }
     }
     getPathStats(relation) {
+        const {onMainStateChange} = this.props
         axios.get("/get_path_stats", {
             params: { task: relation }
         })
@@ -55,10 +52,19 @@ class SidePanel extends React.Component {
                 if (data.state === 200 && data.data !== null) {
                     const pathStatsList = data.data,
                         checkedPathList = []
-                    pathStatsList.forEach(item => {
+                    let color = d3.scaleLinear()
+                        .domain([0, pathStatsList.length - 1])
+                        .range(["#0a1fba", "#D3BDEC"])
+                        .interpolate(d3.interpolateHcl);
+
+                    pathStatsList.forEach((item, index) => {
+                        item.color = color(index)
                         checkedPathList.push(item.path)
                     })
-                    this.setState({ pathStatsList, checkedPathList })
+                    this.setState({ pathStatsList, checkedPathList, "pathDetails": pathStatsList })
+                    onMainStateChange({
+                        pathDetails: pathStatsList
+                    })
                 }
             })
             .catch(error => {
@@ -98,8 +104,8 @@ class SidePanel extends React.Component {
             })
     }
     handleFactPrediction = () => {
-        const { checkedPathList, pathStatsList } = this.state
-        const { curTriple, getKgRef } = this.props
+        const { checkedPathList, pathStatsList, pathDetails } = this.state
+        const { curTriple, getKgRef, onMainStateChange } = this.props
         this.setState({ predictionLoading: true })
         axios.get("/get_prediction_result", {
             params: { sample: curTriple, path_stats: checkedPathList }
@@ -107,11 +113,17 @@ class SidePanel extends React.Component {
             .then(({ data }) => {
                 if (data.state === 200) {
 
-                    const { existPathNodes, existPathLinks, existPaths, prediction_link, existNodes, existLinks  } = data.data
-                    if (existPathNodes !== null) {
-                        getKgRef.handleHightLightPath(true, prediction_link, existNodes, existLinks, colors, pathStatsList)
-                        const existPath = [...Object.keys(existPaths)]
-                        this.setState({ predictionLoading: false, checkedPathList: existPath, existPaths })
+                    const { existPaths, prediction_link, existNodes, existLinks, existPathsDetails } = data.data
+                    if (existPaths !== null) {
+                        getKgRef.handleHightLightPath(true, prediction_link, existNodes, existLinks, pathStatsList)
+                        const checkedPathList = [...Object.keys(existPaths)]
+                        pathDetails.forEach(item => {
+                            item["details"] = existPathsDetails[item.path]
+                        })
+                        onMainStateChange({
+                            pathDetails: pathStatsList
+                        })
+                        this.setState({ predictionLoading: false, checkedPathList: checkedPathList, existPaths })
                     } else {
                         getKgRef.handleHightLightPath(false, prediction_link)
                         message.error("无符合的推理路径！")
@@ -123,7 +135,6 @@ class SidePanel extends React.Component {
                 }
             })
             .catch(error => {
-                console.log(error);
                 message.error("查询推理路径失败！")
                 this.setState({ predictionLoading: false })
             })
@@ -235,8 +246,11 @@ class SidePanel extends React.Component {
     handleDropDownVisibleChange = (flag) => {
         this.setState({ dropDownVisible: flag })
     }
+    showDrawer=() =>{
+        this.props.onMainStateChange({drawerVisible: true})
+    }
     render() {
-        const { pathStatsList, checkedPathList, rankSimilarEntities, similarEntitiesLoading, checkAllFlag, indeterminate, predictionLoading, subGraphLoading, dropDownVisible, sortMethodchecked, sortLoading, existPathIdx } = this.state
+        const { pathStatsList, checkedPathList, rankSimilarEntities, similarEntitiesLoading, checkAllFlag, indeterminate, predictionLoading, subGraphLoading, dropDownVisible, sortMethodchecked, sortLoading, existPaths } = this.state
         const menu = (
             <List
                 size="small"
@@ -279,7 +293,10 @@ class SidePanel extends React.Component {
         );
         return (
             <div className="rl-view-sider">
-                <Divider orientation="left">推理路径</Divider>
+                <Divider orientation="left">推理路径
+                <Button style={{position:"absolute", right:"20px"}} onClick={this.showDrawer}>查看预测详情</Button>
+                </Divider>
+                
                 <List
                     header={
                         <div style={{ display: "flex", justifyContent: "space-between" }} >
@@ -305,7 +322,10 @@ class SidePanel extends React.Component {
                             {(item, index) => {
                                 return (
                                     <List.Item style={{ width: '100%', wordBreak: 'break-word' }}
-                                        actions={[<Badge count={item.weight} style={{ backgroundColor: colors[index] }} />, <Badge count={existPathIdx[item.path] ? existPathIdx[item.path] : 0.1} style={{ backgroundColor: colors[index] }} />]}
+                                        actions={[
+                                            <Badge count={item.weight} style={{ backgroundColor: item.color }} />,
+                                            <div className='badge-hitpath'>{existPaths[item.path] ? existPaths[item.path] : 0}</div>
+                                        ]}
                                     >
                                         <Checkbox value={item.path}></Checkbox>
                                         <Popover
