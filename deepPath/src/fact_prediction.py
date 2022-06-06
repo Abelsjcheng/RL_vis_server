@@ -44,6 +44,7 @@ class factPrediction(object):
 		existPaths = {}
 		existNodes = {}
 		existLinks = {}
+		existPathsDetails = {}
 		for index, path in enumerate(statsPaths):
 			pathName = []
 			relations = path.split(' -> ')
@@ -52,16 +53,17 @@ class factPrediction(object):
 			# 目前3跳子图只能支持3跳路径
 			if len(pathName) > 3:
 				continue
-			entity_list1, path_list1, path_count = self.BFS(sample["sourceEntity"], sample["targetEntity"], pathName)
+			entity_list, link_list, path_count, path_all = self.BFS(sample["sourceEntity"], sample["targetEntity"], pathName)
 
-			if len(entity_list1) and len(path_list1):
-				entity_list1.remove(sample["sourceEntity"])
-				entity_list1.remove(sample["targetEntity"])
-				nodes = nodes | entity_list1
-				links = links | path_list1
-				existNodes[path] = list(entity_list1)
-				existLinks[path] = list(path_list1)
+			if len(entity_list) and len(link_list):
+				entity_list.remove(sample["sourceEntity"])
+				entity_list.remove(sample["targetEntity"])
+				nodes = nodes | entity_list
+				links = links | link_list
+				existNodes[path] = list(entity_list)
+				existLinks[path] = list(link_list)
 				existPaths[path] = path_count
+				existPathsDetails[path] = path_all
 
 		prediction_link = {
 			'id': str(self.entity2id[sample["sourceEntity"]]) + '-' + str(
@@ -75,15 +77,16 @@ class factPrediction(object):
 			'et_name': sample["targetEntity"],
 		}
 		if len(nodes) and len(links):
-			return list(nodes), list(links), existPaths, existNodes, existLinks, prediction_link
+			return existPaths, existNodes, existLinks, prediction_link, existPathsDetails
 		else:
-			return None, None, None, None, None, prediction_link
+			return None, None, None, prediction_link, None
 
 	def BFS(self, sourceEntity, targetEntity, path):
 		res = foundPaths(self.kb)
 		res.markFound(sourceEntity, None, None)
 		entity_all = set()
-		path_all = set()
+		link_all = set()
+		path_all = []
 		path_count = 0
 		q = [[sourceEntity]]
 		for start in range(0, len(path)):
@@ -98,16 +101,17 @@ class factPrediction(object):
 					if not res.isFound(nextEntity) and left_step == connectRelation:
 						if targetEntity == nextEntity and start == len(path) - 1:
 							res.markFound(nextEntity, curNode, connectRelation)
-							entity_list, path_list = res.reconstructPath(sourceEntity, targetEntity, self.entity2id, self.relation2id)
-							entity_all = entity_all | entity_list
-							path_all = path_all | path_list
+							entity_list, link_list = res.reconstructPath(sourceEntity, targetEntity, self.entity2id, self.relation2id)
+							entity_all = entity_all | set(entity_list)
+							link_all = link_all | link_list
+							path_all.append(entity_list)
 							path_count = path_count + 1
 							res.markNoFound(nextEntity)
 						else:
 							res.markFound(nextEntity, curNode, connectRelation)
 							q[start + 1].append(nextEntity)
 
-		return entity_all, path_all, path_count
+		return entity_all, link_all, path_count, path_all
 	# def BFS(self, kb, entity1, entity2, path):
 	# 	res = foundPaths(kb)
 	# 	res.markFound(entity1, None, None)
@@ -127,8 +131,8 @@ class factPrediction(object):
 	# 					q[start+1].append(nextEntity)
 	# 		start += 1
 	# 		if entity2 in q[start] and start == len(path):
-	# 			entity_list, path_list = res.reconstructPath(entity1, entity2, self.entity2id, self.relation2id)
-	# 			return entity_list, path_list
+	# 			entity_list, link_list = res.reconstructPath(entity1, entity2, self.entity2id, self.relation2id)
+	# 			return entity_list, link_list
 	#
 	# 	return None, None
 
@@ -149,35 +153,35 @@ class foundPaths(object):
 		self.entities[entity] = (False, "", "")
 
 	def reconstructPath(self, entity1, entity2, entity2id, relation2id):
-		entity_list = set()
-		path_list = set()
-		link = []
+		entity_list = []
+		link_list = set()
 		curNode = entity2
 		while curNode != entity1:
-			entity_list.add(curNode)
+			entity_list.append(curNode)
 			preNode = self.entities[curNode][1]
 			preRelation = self.entities[curNode][2]
-			link.append(preRelation)
-			path_list.add(json.dumps({
+			# link.append(preRelation)
+			link_list.add(json.dumps({
 				"es_name": preNode,
 				"rel_id": relation2id[preRelation],
 				"et_name": curNode
 			}))
 			# if not preRelation.endswith('_inv'):
-			# 	path_list.add(json.dumps({
+			# 	link_list.add(json.dumps({
 			# 		"es_name": preNode,
 			# 		"rel_id": relation2id[preRelation],
 			# 		"et_name": curNode
 			# 	}))
 			# else:
-			# 	path_list.add(json.dumps({
+			# 	link_list.add(json.dumps({
 			# 		"es_name": curNode,
 			# 		"rel_id": relation2id[preRelation],
 			# 		"et_name": preNode
 			# 	}))
 			curNode = preNode
-		entity_list.add(curNode)
-		return entity_list, path_list
+		entity_list.append(curNode)
+		entity_list.reverse()
+		return entity_list, link_list
 
 	def __str__(self):
 		res = ""

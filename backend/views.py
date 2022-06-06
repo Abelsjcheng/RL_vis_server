@@ -79,10 +79,9 @@ def get_prediction_result(request):
         feature_paths = request.GET.getlist("path_stats[]")
         relation = '_'.join(relation.split(':'))
         fact_prediction = factPrediction(relation)
-        nodes, links, existPaths, existNodes, existLinks, prediction_link = fact_prediction.prediction(sample,feature_paths)
+        existPaths, existNodes, existLinks, prediction_link, existPathsDetails = fact_prediction.prediction(sample,feature_paths)
         try:
-            print(existPaths)
-            return HttpResponse(json.dumps({'state': 200, 'data': {"existPathNodes": nodes, "existPathLinks": links, "existPaths": existPaths, "prediction_link": prediction_link, "existNodes": existNodes, "existLinks": existLinks}}), content_type='application/json')
+            return HttpResponse(json.dumps({'state': 200, 'data': {"existPaths": existPaths, "prediction_link": prediction_link, "existNodes": existNodes, "existLinks": existLinks, "existPathsDetails": existPathsDetails}}), content_type='application/json')
         except:
             return HttpResponse(json.dumps({'state': 500, 'data': None}), content_type='application/json')
 
