@@ -97,7 +97,7 @@ def get_features():
 
         if path not in stats:
             continue
-        elif max_freq > 1 and stats[path] < 1:
+        elif max_freq > 1 and stats[path] < 1:  # 选取所有带有权重的规则路径
             continue
 
         length = len(path.split(' -> '))
@@ -176,7 +176,7 @@ for line in test_data:
     #e1 = '/' + e1[0] + '/' + e1[2:]
     e2 = line.split(',')[1].split(':')[0].replace('thing$','')
     #e2 = '/' + e2[0] + '/' + e2[2:]
-    # 存在子图的测试
+    # 存在子图的测试 做过滤
     if e1 not in kb.entities:
         continue
     #if (e1 not in kb.entities) or (e2 not in kb.entities):
@@ -276,8 +276,8 @@ rule_label = list(range(1, len(named_paths)+1))
 reliability = list(np.around((rule_tp - rule_fp) / rule_tp, 2))
 reliability = zip(reliability, rule_label)
 rank_reliability = sorted(reliability, key = lambda x:x[0], reverse=True)
-print("可信度", rank_reliability)
-print("可信度", [item[1] for idx, item in enumerate(rank_reliability)])
+print("可用性率排序", rank_reliability)
+print("可用性率排序仅id", [item[1] for idx, item in enumerate(rank_reliability)])
 
 for idx, item in enumerate(rank_stats_rl):
     if item[1] == 1:
