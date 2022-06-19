@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from backend import views
+from backend import views, sorceControl
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,4 +25,5 @@ urlpatterns = [
     path('get_similar_json/', views.get_similar_json),
     path('get_prediction_result/', views.get_prediction_result),
     path('get_subgraph_support_sort/', views.get_subgraph_support_sort),
+    path('saveScore/', sorceControl.saveScore),
 ]
