@@ -4,6 +4,7 @@ import * as echarts from 'echarts';
 import relation from '../../case/relation.json'
 import { Slider, Row, Col } from 'antd';
 
+// 关系概率柱状图
 class BarChart extends React.Component {
     constructor(props) {
         super(props);
@@ -18,14 +19,13 @@ class BarChart extends React.Component {
         }
     }
     componentDidMount() {
-        this.initCalendarChart()
+        this.initBarChart()
     }
     componentWillReceiveProps(nextProps) {
-        this.initCalendarChart()
+        this.initBarChart()
     }
-    initCalendarChart() {
+    initBarChart() {
         const { evidence, relationName } = this.props
-        console.log(evidence);
         const chartDom = ReactDOM.findDOMNode(this);
         let chart = echarts.init(chartDom);
         let probs_array = evidence.action_probs_array[evidence.chosen_r_name_array.indexOf(relationName)]

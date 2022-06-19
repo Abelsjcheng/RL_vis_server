@@ -1,0 +1,6 @@
+concept:athleteplayssport -> concept:teamplayssport_inv -> concept:teamplaysinleague	10
+concept:athleteplaysforteam -> concept:teamplaysinleague	5
+concept:athleteledsportsteam -> concept:teamplaysinleague	2
+concept:athleteplaysforteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysinleague	1
+concept:athletehomestadium -> concept:leaguestadiums_inv	1
+concept:athleteledsportsteam -> concept:teamplaysagainstteam -> concept:teamplaysinleague	1

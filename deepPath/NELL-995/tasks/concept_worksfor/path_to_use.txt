@@ -1,19 +1,19 @@
-concept:personleadsorganization
 concept:organizationhiredperson_inv
+concept:personleadsorganization
 concept:agentcollaborateswithagent_inv
 concept:journalistwritesforpublication
-concept:mutualproxyfor_inv
 concept:organizationterminatedperson_inv
+concept:mutualproxyfor_inv
 concept:topmemberoforganization
-concept:coachesteam
-concept:ceoof
-concept:agentcontrols
-concept:personhasresidenceingeopoliticallocation
-concept:subpartof_inv
 concept:personleadsorganization -> concept:personleadsorganization_inv -> concept:personleadsorganization
-concept:agentcollaborateswithagent -> concept:agentcollaborateswithagent_inv -> concept:personleadsorganization
 concept:journalistwritesforpublication -> concept:journalistwritesforpublication_inv -> concept:journalistwritesforpublication
 concept:personleadsorganization -> concept:hasofficeincity -> concept:hasofficeincity_inv
+concept:agentcontrols
+concept:coachesteam
+concept:ceoof
+concept:personhasresidenceingeopoliticallocation
+concept:subpartof_inv
+concept:agentcollaborateswithagent -> concept:agentcollaborateswithagent_inv -> concept:personleadsorganization
 concept:organizationterminatedperson_inv -> concept:organizationhiredperson -> concept:personleadsorganization
 concept:personbelongstoorganization -> concept:organizationhiredperson -> concept:organizationhiredperson_inv
 concept:journalistwritesforpublication -> concept:competeswith -> concept:hasofficeincity
@@ -22,4 +22,6 @@ concept:personleadsorganization -> concept:agentcontrols -> concept:agentcontrol
 concept:agentcontrols_inv -> concept:agentcollaborateswithagent -> concept:agentcollaborateswithagent_inv
 concept:topmemberoforganization -> concept:organizationheadquarteredincity -> concept:organizationheadquarteredincity_inv
 concept:agentcontrols_inv -> concept:agentcollaborateswithagent -> concept:topmemberoforganization
-concept:journalistwritesforpublication -> concept:journalistwritesforpublication_inv -> concept:journalistwritesforpublication -> concept:headquarteredin
+concept:organizationhiredperson_inv -> concept:teamplaysagainstteam
+concept:personbelongstoorganization -> concept:subpartof_inv -> concept:proxyfor
+concept:organizationhiredperson_inv -> concept:organizationhiredperson -> concept:organizationhiredperson_inv

@@ -1,6 +1,8 @@
-concept:athleteplayssport -> concept:teamplayssport_inv -> concept:teamplaysinleague	10
-concept:athleteplaysforteam -> concept:teamplaysinleague	5
-concept:athleteledsportsteam -> concept:teamplaysinleague	2
+concept:athleteplayssport -> concept:teamplayssport_inv -> concept:teamplaysinleague	35
+concept:athleteplaysforteam -> concept:teamplaysinleague	19
+concept:athleteledsportsteam -> concept:teamplaysinleague	6
+concept:athletehomestadium -> concept:leaguestadiums_inv	3
+concept:coachesinleague	1
 concept:athleteplaysforteam -> concept:teamplaysagainstteam_inv -> concept:teamplaysinleague	1
-concept:athletehomestadium -> concept:leaguestadiums_inv	1
-concept:athleteledsportsteam -> concept:teamplaysagainstteam -> concept:teamplaysinleague	1
+concept:athleteplaysforteam -> concept:teamplaysagainstteam -> concept:teamplaysinleague	1
+concept:personbelongstoorganization -> concept:teamplaysinleague	1

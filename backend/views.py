@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 import json
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 from deepPath.src.DFS import dfs
 from deepPath.src.find_entity_similar import get_similar_entities
 from deepPath.src.fact_prediction import factPrediction
@@ -16,8 +18,8 @@ def get_sub_graph(request):
         relation = request.GET.get("relation")
         targetNode = request.GET.get("targetEntity")
         hop = request.GET.get("hop")
+        paths, subGraph = dfs(sourceNode, relation, targetNode, int(hop))
         try:
-            paths, subGraph = dfs(sourceNode, relation, targetNode, int(hop))
             return HttpResponse(json.dumps({'state': 200, 'data': subGraph}), content_type='application/json')
         except:
             return HttpResponse(json.dumps({'state': 500, 'data': None}), content_type='application/json')
@@ -45,18 +47,59 @@ def get_test_data(request):
 def get_path_stats(request):
     if request.method == 'GET':
         relation = request.GET.get("task")
-        stats = []
+        stats = {}
+        rulePaths = []
+        supports = []
         relation = '_'.join(relation.split(':'))
         f = open(os.path.join(settings.BASE_DIR, 'deepPath/NELL-995/tasks/' + relation + '/path_stats.txt'))
         path_freq = f.readlines()
         f.close()
+        f2 = open(os.path.join(settings.BASE_DIR, 'deepPath/NELL-995/tasks/' + relation + '/path_to_use.txt'))
+        paths_to_use = f2.readlines()
+        f2.close()
+
+        f3 = open(os.path.join(settings.BASE_DIR, 'deepPath/NELL-995/' + 'relation2id.txt'))
+        content2 = f3.readlines()
+        f3.close()
+        relation2id = {}
+        for line in content2:
+            relation2id[line.split()[0]] = int(line.split()[1])
+        relation2vec = np.loadtxt(os.path.join(settings.BASE_DIR, 'deepPath/NELL-995/' + '/relation2vec.bern'))
+
+        def path_embedding(path):
+            embeddings = [relation2vec[relation2id[rel], :] for rel in path]
+            embeddings = np.reshape(embeddings, (-1, 100))
+            path_encoding = np.sum(embeddings, axis=0)
+            return np.reshape(path_encoding, (-1, 100))
+
         for line in path_freq:
             path = line.split('\t')[0]
             num = int(line.split('\t')[1])
-            stats.append({"path": path, "weight": num})
+            stats[path] = num
+        use_path_sim = {}
+        for line in paths_to_use:
+            path = line.rstrip()
+            length = len(path.split(' -> '))
+            if length <= 3:
+                if path in stats:
+                    rulePaths.append({"path": path, "weight": stats[path]})
+                    supports.append({"path": path, "weight": stats[path]})
+                else:
+                    sim_sort = []
+                    use_path_embedding = path_embedding(path.split(' -> '))
+                    for stats_path in stats:
+                        stats_path_embedding = path_embedding(stats_path.split(' -> '))
+                        cos_sim = cosine_similarity(use_path_embedding, stats_path_embedding)
+                        cos_sim = round(cos_sim[0][0], 2)
+                        _weight = cos_sim * stats[stats_path]
+                        sim_sort.append([stats_path, cos_sim, _weight])
+                        sim_sort.sort(key=lambda x: x[1], reverse=True)
+                        use_path_sim[path] = sim_sort
+                    supports.append({"path": path, "weight": 0})
+        rulePaths.sort(key = lambda x:x["weight"], reverse=True)
+        supports.sort(key = lambda x:x["weight"], reverse=True)
         try:
-
-            return HttpResponse(json.dumps({'state': 200, 'data': list(stats)}), content_type='application/json')
+            return HttpResponse(json.dumps({'state': 200, 'data': {"rulePaths": list(rulePaths), "supportPaths": list(supports), "use_path_sim": use_path_sim}}), content_type='application/json')
         except:
             return HttpResponse(json.dumps({'state': 500, 'data': None}), content_type='application/json')
 

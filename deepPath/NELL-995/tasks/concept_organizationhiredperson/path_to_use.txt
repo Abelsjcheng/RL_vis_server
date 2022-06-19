@@ -1,9 +1,13 @@
 concept:worksfor_inv
 concept:personbelongstoorganization_inv
 concept:organizationterminatedperson
+concept:personleadsorganization_inv
 concept:coachesteam_inv
 concept:mutualproxyfor
 concept:subpartof
-concept:personleadsorganization_inv
+concept:worksfor_inv -> concept:worksfor -> concept:coachesteam_inv
+concept:topmemberoforganization_inv
+concept:ceoof_inv
+concept:agentbelongstoorganization -> concept:worksfor_inv
+concept:atdate -> concept:atdate_inv -> concept:worksfor_inv
 concept:personhasresidenceingeopoliticallocation_inv
-concept:atdate -> concept:atdate_inv -> concept:atdate -> concept:atdate_inv -> concept:atdate -> concept:atdate_inv -> concept:worksfor_inv

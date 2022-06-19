@@ -21,7 +21,7 @@ class IndexPage extends React.Component {
             extraSubGraphs: [],
             extrakgRefs: {},
             drawerVisible: false,
-            pathDetails: []
+            pathDetails: [],
         };
     }
     componentDidMount() {
@@ -33,7 +33,7 @@ class IndexPage extends React.Component {
     handelMainStateChange = (nextstates) => {
         this.setState(nextstates)
     }
-    onDrawerClose = () => {
+    handleDrawerClose = () => {
         this.setState({ drawerVisible: false })
     }
     render() {
@@ -42,7 +42,7 @@ class IndexPage extends React.Component {
         return (
             <div className="App">
                 <Layout hasSider>
-                    <Sider style={{ background: '#fff', position: 'fixed', left: 0, top: 0, bottom: 0 }} width={340}>
+                    <Sider style={{ background: '#fff', position: 'fixed', left: 0, top: 0, bottom: 0, overflow: 'auto', }} width={340}>
                         <div className='rl-title'>RL关系预测</div>
                         <SidePanel getKgRef={kgRef} getExtrakgRefs={extrakgRefs} kgData={kgData} curTriple={curTriple} onMainStateChange={this.handelMainStateChange}  ></SidePanel>
                     </Sider>
@@ -59,7 +59,6 @@ class IndexPage extends React.Component {
                             style={{
                                 padding: 24,
                                 margin: 0,
-                                overflow: 'initial',
                                 width: '100%',
                                 position: 'relative',
                                 overflow: 'hidden'
@@ -89,14 +88,15 @@ class IndexPage extends React.Component {
 
                             </div>
                             <Drawer
-                                title="预测结果详情"
+                                title="命中路径详情"
                                 placement="bottom"
                                 width={500}
-                                onClose={this.onDrawerClose}
+                                onClose={this.handleDrawerClose}
                                 visible={drawerVisible}
                                 getContainer={false}
                                 mask={false}
                                 style={{ position: 'absolute' }}
+                                bodyStyle={{padding: "0 24px"}}
                                 extra={
                                     <Space>
                                         <span>当前预测概率: 90%</span>
@@ -109,12 +109,13 @@ class IndexPage extends React.Component {
                                     </Space>
                                 }
                             >
-                                <Collapse accordion>
+                                <PathDetailsTabel pathData={pathDetails}></PathDetailsTabel>
+                                {/* <Collapse accordion>
                                     {
                                         pathDetails.map((item, index) => {
                                             return (
                                                 <Panel
-                                                    header={"path_rule" + (index + 1) + ': ' + item.path}
+                                                    header={"rule_path" + (index + 1) + ': ' + item.path}
                                                     key={index}
                                                     extra={<>
                                                         <label>打分: </label>
@@ -125,7 +126,7 @@ class IndexPage extends React.Component {
                                             )
                                         })
                                     }
-                                </Collapse>
+                                </Collapse> */}
                             </Drawer>
                         </Content>
                     </Layout>

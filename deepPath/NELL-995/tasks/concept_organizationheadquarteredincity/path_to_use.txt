@@ -1,7 +1,8 @@
-concept:radiostationincity
 concept:televisionstationincity
+concept:radiostationincity
 concept:headquarteredin
 concept:hasofficeincity
 concept:competeswith_inv -> concept:headquarteredin
-concept:radiostationincity -> concept:locationlocatedwithinlocation_inv
+concept:competeswith_inv -> concept:competeswith_inv -> concept:competeswith_inv -> concept:headquarteredin
 concept:competeswith_inv -> concept:competeswith_inv -> concept:agentcontrols_inv -> concept:headquarteredin
+concept:radiostationincity -> concept:locationlocatedwithinlocation_inv

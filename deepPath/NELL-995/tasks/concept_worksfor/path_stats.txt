@@ -9,6 +9,19 @@ concept:personleadsorganization -> concept:personleadsorganization_inv -> concep
 concept:journalistwritesforpublication -> concept:journalistwritesforpublication_inv -> concept:journalistwritesforpublication	1
 concept:personleadsorganization -> concept:hasofficeincity -> concept:hasofficeincity_inv	1
 concept:agentcontrols	1
+concept:coachesteam	1
+concept:ceoof	1
+concept:personhasresidenceingeopoliticallocation	1
+concept:subpartof_inv	1
+concept:agentcollaborateswithagent -> concept:agentcollaborateswithagent_inv -> concept:personleadsorganization	1
+concept:organizationterminatedperson_inv -> concept:organizationhiredperson -> concept:personleadsorganization	1
+concept:personbelongstoorganization -> concept:organizationhiredperson -> concept:organizationhiredperson_inv	1
+concept:journalistwritesforpublication -> concept:competeswith -> concept:hasofficeincity	1
+concept:personbelongstoorganization -> concept:personleadsorganization_inv -> concept:topmemberoforganization	1
+concept:personleadsorganization -> concept:agentcontrols -> concept:agentcontrols_inv	1
+concept:agentcontrols_inv -> concept:agentcollaborateswithagent -> concept:agentcollaborateswithagent_inv	1
+concept:topmemberoforganization -> concept:organizationheadquarteredincity -> concept:organizationheadquarteredincity_inv	1
+concept:agentcontrols_inv -> concept:agentcollaborateswithagent -> concept:topmemberoforganization	1
 concept:organizationhiredperson_inv -> concept:teamplaysagainstteam	1
 concept:personbelongstoorganization -> concept:subpartof_inv -> concept:proxyfor	1
 concept:organizationhiredperson_inv -> concept:organizationhiredperson -> concept:organizationhiredperson_inv	1

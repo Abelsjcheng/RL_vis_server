@@ -26,7 +26,7 @@ export async function getSubGraph(triple, hop) {
     })
         .then(({ data }) => {
             if (data.state === 200 && data.data !== null) {
-                result = buildKg(data.data, triple)
+                result = rebuildKgData(data.data, triple)
             } else {
                 throw new Error("未查询到子图！")
             }
@@ -37,9 +37,10 @@ export async function getSubGraph(triple, hop) {
     return result
 }
 
-function buildKg(graph, triple) {
+function rebuildKgData(graph, triple) {
     let map = new Map(),
         entitys = {}
+    // 重构实体集，记录实体的所有输入和输出边
     graph.links.forEach(link => {
         if (entitys[link.es_name]) {
             entitys[link.es_name].out.push({
@@ -85,6 +86,7 @@ function buildKg(graph, triple) {
         }
     })
     let count = 0
+    // 根据节点具有相同输入和输出边，进行分类分组
     for (let value of Object.values(entitys)) {
         let nodeType = JSON.stringify({ "out": value.out, "enter": value.enter })
         if (map.has(nodeType)) {
@@ -98,11 +100,13 @@ function buildKg(graph, triple) {
             map.set(nodeType, { "id": type_id, "group": [value], "pos_inPath": value.pos_inPath })
         }
     }
+    // 记录聚合节点的子节点数量
     for (let value of Object.values(entitys)) {
         let nodeType = JSON.stringify({ "out": value.out, "enter": value.enter })
         let type_group = map.get(nodeType)
         value.group_Num = type_group.group.length
     }
+    // 重构nodes数据
     let links = []
     for (let [key, value] of map.entries()) {
         let _key = JSON.parse(key)

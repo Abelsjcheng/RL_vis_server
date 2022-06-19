@@ -10,7 +10,6 @@ class Kg extends React.Component {
     constructor(props) {
         super(props);
         this._kgData = JSON.parse(JSON.stringify(props.kgData));
-        this.simulation = d3.forceSimulation();
         this.zoom = d3.zoom();
         this.svg = null;
         this.svg_kg = null;
@@ -106,8 +105,6 @@ class Kg extends React.Component {
         }
     }
     initSvg() {
-        const { nodes } = this.state
-        const { curTriple } = this.props
         this.svgWidth = this.kgNetwork.current.offsetWidth
         this.svgHeight = this.kgNetwork.current.offsetHeight
         // 加载缩放
@@ -294,7 +291,7 @@ class Kg extends React.Component {
         let nodeEnter = node.enter()
             .append('g')
             .attr("id", d => `node${d.id}`)
-            .call(this.dragInTreeLayout())
+            .call(this.treeLayoutDrag())
 
 
         nodeEnter.append("circle")
@@ -481,7 +478,7 @@ class Kg extends React.Component {
                     /*
                         left_x 圆左上角的点x轴值
                         right_x 圆右上角的点x轴值
-                        y  圆左上角的y轴值
+                        y  圆上点的y轴值
                     */
                     const left_x = d.source.x - Math.sin(2 * Math.PI / 360 * 60) * forceSet.nodeSize,
                         right_x = d.source.x + Math.sin(2 * Math.PI / 360 * 60) * forceSet.nodeSize,
@@ -542,14 +539,14 @@ class Kg extends React.Component {
                         source_y = d.source.y + Math.sin(Math.PI * 2 / 360 * source_degree) * source_r,
                         target_x = d.target.x + Math.cos(Math.PI * 2 / 360 * target_degree) * target_r,
                         target_y = d.target.y + Math.sin(Math.PI * 2 / 360 * target_degree) * target_r;
-                    if (d.id === "15492-62111_0-233-15492-62111_8")
-                        console.log(angle);
+
                     return angle < 0 ? `translate(${((source_x + target_x) / 2).toFixed(2)},${((source_y + target_y) / 2 - d.linknum * 10).toFixed(2)}) rotate(${angle})`
                         : `translate(${((source_x + target_x) / 2).toFixed(2)},${((source_y + target_y) / 2 + d.linknum * 10).toFixed(2)}) rotate(${angle})`
 
                 }
             });
     }
+    // 自适应缩放-
     autoZoom() {
         const viewBox = this.svg.node().getBBox(),
             transform = d3.zoomTransform(this.svg.node()),
@@ -564,6 +561,7 @@ class Kg extends React.Component {
             this.svg.transition().duration(750).call(this.zoom.transform, t)
         }
     }
+    // 聚合圆内的forceTick
     nodeGroupForceDragTick(simulation, nodes, nodeSize, width, height) {
         simulation.on('tick', () => {
             // 节点显示位置
@@ -600,7 +598,7 @@ class Kg extends React.Component {
             scale(${event.transform.k.toFixed(4)})`
         );
     }
-    dragInTreeLayout() {
+    treeLayoutDrag() {
         let _this = this
         function dragstarted(event, d) {
             _this.setState({ switchSet: Object.assign({}, _this.state.switchSet, { autoZoomFlag: false }) })
@@ -625,7 +623,7 @@ class Kg extends React.Component {
             .on('drag', dragged)
             .on('end', dragended);
     }
-    // 拖拽
+    // force拖拽
     drag(simulation) {
         let _this = this
 
@@ -677,23 +675,11 @@ class Kg extends React.Component {
                 }
             })
     }
-    pathForward(action, wait) {
-        const { svgStyle } = this.state
 
-        return new Promise(resolve => {
-            d3.select(`#link${action.link_id}`)
-                .style("stroke", "yellow")
-                .style("stroke-width", svgStyle.linkWidth * 3)
-            d3.select(`#node${action.et_id}`)
-                .select('.node')
-                .style("fill", "green")
-            setTimeout(resolve, wait)
-        })
-    }
     handleHightLightPath(predictionFlag, prediction_link, existNodes, existLinks, pathStatsList) {
         const { entitys } = this.props
         const { forceSet } = this.state
-        this.clearSvg()
+        // this.clearSvg()
         // 添加预测的头尾实体间的边
         let _links = [...this.props.kgData.links],
             _prediction_link = {
@@ -712,9 +698,10 @@ class Kg extends React.Component {
                 this.updateNode
                     .each(function (d) {
                         let node_dom = d3.select(this)
+                        // 过滤头尾实体
                         if (!(d.id === entitys[prediction_link.es_name].type_id || d.id === entitys[prediction_link.et_name].type_id)) {
-
-                            const find_path_index = (name) => {
+                            // 获取当前节点命中的规则路径
+                            const find_hit_rulePaths = (name) => {
                                 let paths = []
                                 for (let key in existNodes) {
                                     if (existNodes[key].includes(name)) {
@@ -723,11 +710,12 @@ class Kg extends React.Component {
                                 }
                                 return paths
                             }
-                            let paths = find_path_index(d.group[0].name)
-                            if (paths.length > 0) {
+                            let rulePaths = find_hit_rulePaths(d.group[0].name)
+                            if (rulePaths.length > 0) {
+                                // 节点被规则路径经过，则创建饼图可视化
                                 const pie = d3.pie()
                                     .value((d) => d.weight)
-                                    (paths)
+                                    (rulePaths)
 
                                 const arc = d3.arc()
                                     .innerRadius(0)
@@ -781,6 +769,7 @@ class Kg extends React.Component {
                                     //     .style("fill", paths[0].color)
                                 }
                             } else {
+                                // 节点未被规则路径经过，淡化处理
                                 node_dom.select('.node')
                                     .style("opacity", "0.3")
                                 node_dom.select('.node-text')

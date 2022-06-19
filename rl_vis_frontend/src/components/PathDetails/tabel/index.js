@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Table, Tag, Space } from 'antd';
+import { Table, Tag, Space, Input, Tooltip } from 'antd';
 import { splitLinkName, splitNodeName } from '../../../util/tool'
+import { EyeOutlined } from '@ant-design/icons';
 import './index.scss'
 
 
@@ -16,15 +17,14 @@ const PathDetailsTabel = (props) => {
     })
     const columns = [
         {
-            title: 'Path',
+            title: 'ground path',
             dataIndex: 'path',
             key: 'path',
             "render": (paths) => {
-                const rels = pathData.path.split(" -> ")
+                const rels = pathData.rulePath.split(" -> ")
                 return (
                     <>
                         {
-
                             paths.map((entity, index) => {
                                 if (index < rels.length) {
                                     return (
@@ -52,18 +52,30 @@ const PathDetailsTabel = (props) => {
             width: '90%',
         },
         {
-            title: 'Action',
-            key: 'action',
+            title: '打分',
+            dataIndex: '',
+            key: 'sorce',
             render: (_, record) => (
-                <a>查看</a>
+                <Input style={{ width: 30 }} size={"small"} maxLength={10} />
             ),
         },
+        {
+            title: '操作',
+            dataIndex: '',
+            key: 'action',
+            render: (_, { path }) => (
+                <Tooltip placement="bottom" title={"查看当前路径"}>
+                    <EyeOutlined  />
+                </Tooltip>
+
+            ),
+        }
     ];
     // const [visible, setVisible] = useState(false);
     // const [placement, setPlacement] = useState('right');
-
+    const tabelTitle = () => `规则路径: ${pathData.rulePath}`
     return (
-        <Table columns={columns} dataSource={data} scroll={{ y: 240 }} size={'small'} />
+        <Table title={tabelTitle} columns={columns} dataSource={data} scroll={{ y: 190 }} size={'small'} />
     );
 };
 
