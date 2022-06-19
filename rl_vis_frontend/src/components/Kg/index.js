@@ -818,7 +818,7 @@ class Kg extends React.Component {
                     })
                 }
                 for (let [key, value] of Object.entries(highLight_links)) {
-                    // 创建样式
+                    // 渐进填充区分多条规则经过同一条边
                     let linearGradient = this.linkGroup.append("defs")
                         .append("linearGradient")
                         .attr("id", d => { return `myGradient${key}` })
@@ -948,7 +948,6 @@ function setLinkNumbers(group) {
         const link = linksA[i];
         if (linksB.length === 0) {
             if (linksA.length > 1) {
-                // 1 -1 2 -2 3 -3
                 link.linknum = i % 2 === 0 ? (++startLinkANumber) * Math.pow(-1, i) : startLinkANumber * Math.pow(-1, i)
             } else {
                 link.linknum = 0
