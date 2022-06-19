@@ -46,7 +46,7 @@ class SidePanel extends React.Component {
         }
     }
     getPathStats(relation) {
-        axios.get("/get_path_stats", {
+        axios.get("/get_rulePaths", {
             params: { task: relation }
         })
             .then(({ data }) => {

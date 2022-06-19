@@ -21,7 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('get_sub_graph/', views.get_sub_graph),
     path('get_test_data/', views.get_test_data),
-    path('get_path_stats/', views.get_path_stats),
+    path('get_rulePaths/', views.get_rulePaths),
     path('get_similar_json/', views.get_similar_json),
     path('get_prediction_result/', views.get_prediction_result),
     path('get_subgraph_support_sort/', views.get_subgraph_support_sort),
